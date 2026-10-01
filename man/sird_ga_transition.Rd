@@ -21,15 +21,20 @@ by Simpson's rule).}
 \value{
 A list of class \code{sird_ga_transition} with components \code{x_obs}
 (matrix of states at \verb{t_0, ..., t_n}), \code{segments} (one list per
-interval, with fine-grid \code{t}, \code{x} and \code{P}), and \code{parms}.
+interval, with fine-grid \code{t}, \code{x} and \code{P}, \code{P[,,1]} always the
+identity), and \code{parms}.
 }
 \description{
-For each observation interval \eqn{[t_{k-1}, t_k]}, jointly solves the
-deterministic SIRD trajectory \eqn{x(t)} and the local fundamental
-(sensitivity) matrix \eqn{\Phi(s, t_{k-1})} of the linearised dynamics,
-resetting the fundamental matrix to the identity at the start of each
-interval. Resetting locally (rather than accumulating a single
-fundamental matrix from \eqn{t_0}) keeps the matrix well-conditioned even
-over long series, since \eqn{\Phi(t,0)} can otherwise span many orders of
-magnitude once the epidemic has grown and decayed.
+Jointly solves the deterministic SIRD trajectory \eqn{x(t)} and the
+fundamental (sensitivity) matrix of the linearised dynamics in a
+\strong{single} \code{\link[deSolve:ode]{deSolve::ode()}} call spanning the whole observation window,
+using a \emph{reset event} that sets the fundamental matrix back to the
+identity at the start of every observation interval. This gives the
+same locally-anchored resolvent \eqn{\Phi(s, t_{k-1})} as restarting the
+solver once per interval (and the same numerical stability — the matrix
+never has to span more than one interval, which matters for long
+series), while paying the fixed per-call overhead of \code{\link[deSolve:ode]{deSolve::ode()}}
+only once instead of \code{n} times. This is the single biggest cost in
+repeated likelihood evaluation (MLE optimisation, bootstrap), so the
+single-call form is the default implementation.
 }

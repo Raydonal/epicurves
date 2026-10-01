@@ -17,6 +17,15 @@
 #'   `estimate_r0 = FALSE` (default `0`, appropriate for data starting at
 #'   or near the onset of the epidemic).
 #' @param estimate_r0 Logical; estimate `r0` jointly instead of fixing it.
+#' @param p_max Upper bound enforced on the reporting probability `p`
+#'   (default `0.999`). Real daily case series are rarely reported with
+#'   near-100% completeness; without an upper cap strictly below 1, the
+#'   optimiser can drive `p -> 1` and `tau2` to a degenerate extreme
+#'   (perfect reporting, all residual variance absorbed by the
+#'   measurement-noise term), a boundary artefact rather than a genuine
+#'   optimum. Setting `p_max` around 0.95-0.98 is recommended for real
+#'   data; simulation studies where the reporting rate is itself the
+#'   target of recovery can use `p_max = 0.999`.
 #' @param n_sub,Q0_diag Passed to [sird_ga_loglik()].
 #' @param control List of control parameters passed to [stats::optim()].
 #' @param hessian Logical; compute the numerical Hessian in the
@@ -30,14 +39,15 @@
 #'   standard errors on the unconstrained scale, or `NULL`).
 #' @export
 sird_ga_fit <- function(y, N, Delta = 1, start, r0_fixed = 0,
-                         estimate_r0 = FALSE, n_sub = 10L, Q0_diag = 1e-8,
+                         estimate_r0 = FALSE, p_max = 0.999,
+                         n_sub = 10L, Q0_diag = 1e-8,
                          control = list(maxit = 3000, reltol = 1e-10),
                          hessian = TRUE) {
   start <- as.list(start)
 
   to_free <- function(th) {
     v <- c(log(th$lambda), log(th$gamma), log(th$alpha),
-           stats::qlogis(th$i0), stats::qlogis(th$p), log(th$tau2))
+           stats::qlogis(th$i0), stats::qlogis(th$p / p_max), log(th$tau2))
     if (estimate_r0) {
       r0_frac <- th$r0 / (1 - th$i0)
       v <- c(v, stats::qlogis(max(min(r0_frac, 1 - 1e-8), 1e-8)))
@@ -46,7 +56,7 @@ sird_ga_fit <- function(y, N, Delta = 1, start, r0_fixed = 0,
   }
   from_free <- function(v) {
     lambda <- exp(v[1]); gamma <- exp(v[2]); alpha <- exp(v[3])
-    i0 <- stats::plogis(v[4]); p <- stats::plogis(v[5]); tau2 <- exp(v[6])
+    i0 <- stats::plogis(v[4]); p <- p_max * stats::plogis(v[5]); tau2 <- exp(v[6])
     r0 <- if (estimate_r0) (1 - i0) * stats::plogis(v[7]) else r0_fixed
     s0 <- 1 - i0 - r0
     c(lambda = lambda, gamma = gamma, alpha = alpha,

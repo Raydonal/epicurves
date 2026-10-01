@@ -11,6 +11,7 @@ sird_ga_fit(
   start,
   r0_fixed = 0,
   estimate_r0 = FALSE,
+  p_max = 0.999,
   n_sub = 10L,
   Q0_diag = 1e-08,
   control = list(maxit = 3000, reltol = 1e-10),
@@ -33,6 +34,16 @@ sird_ga_fit(
 or near the onset of the epidemic).}
 
 \item{estimate_r0}{Logical; estimate \code{r0} jointly instead of fixing it.}
+
+\item{p_max}{Upper bound enforced on the reporting probability \code{p}
+(default \code{0.999}). Real daily case series are rarely reported with
+near-100\% completeness; without an upper cap strictly below 1, the
+optimiser can drive \code{p -> 1} and \code{tau2} to a degenerate extreme
+(perfect reporting, all residual variance absorbed by the
+measurement-noise term), a boundary artefact rather than a genuine
+optimum. Setting \code{p_max} around 0.95-0.98 is recommended for real
+data; simulation studies where the reporting rate is itself the
+target of recovery can use \code{p_max = 0.999}.}
 
 \item{n_sub, Q0_diag}{Passed to \code{\link[=sird_ga_loglik]{sird_ga_loglik()}}.}
 

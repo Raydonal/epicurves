@@ -1,13 +1,17 @@
 #' Solve the SIRD-GA state-space transition quantities
 #'
-#' For each observation interval \eqn{[t_{k-1}, t_k]}, jointly solves the
-#' deterministic SIRD trajectory \eqn{x(t)} and the local fundamental
-#' (sensitivity) matrix \eqn{\Phi(s, t_{k-1})} of the linearised dynamics,
-#' resetting the fundamental matrix to the identity at the start of each
-#' interval. Resetting locally (rather than accumulating a single
-#' fundamental matrix from \eqn{t_0}) keeps the matrix well-conditioned even
-#' over long series, since \eqn{\Phi(t,0)} can otherwise span many orders of
-#' magnitude once the epidemic has grown and decayed.
+#' Jointly solves the deterministic SIRD trajectory \eqn{x(t)} and the
+#' fundamental (sensitivity) matrix of the linearised dynamics in a
+#' **single** [deSolve::ode()] call spanning the whole observation window,
+#' using a *reset event* that sets the fundamental matrix back to the
+#' identity at the start of every observation interval. This gives the
+#' same locally-anchored resolvent \eqn{\Phi(s, t_{k-1})} as restarting the
+#' solver once per interval (and the same numerical stability — the matrix
+#' never has to span more than one interval, which matters for long
+#' series), while paying the fixed per-call overhead of [deSolve::ode()]
+#' only once instead of `n` times. This is the single biggest cost in
+#' repeated likelihood evaluation (MLE optimisation, bootstrap), so the
+#' single-call form is the default implementation.
 #'
 #' @param times Numeric vector of observation times, `t_0 < t_1 < ... < t_n`
 #'   (typically `0:n`).
@@ -18,13 +22,23 @@
 #'   by Simpson's rule).
 #' @return A list of class `sird_ga_transition` with components `x_obs`
 #'   (matrix of states at `t_0, ..., t_n`), `segments` (one list per
-#'   interval, with fine-grid `t`, `x` and `P`), and `parms`.
+#'   interval, with fine-grid `t`, `x` and `P`, `P[,,1]` always the
+#'   identity), and `parms`.
 #' @export
 sird_ga_transition <- function(times, x0, parms, n_sub = 10L) {
   stopifnot(length(times) >= 2L, all(diff(times) > 0))
   if (n_sub %% 2L == 1L) n_sub <- n_sub + 1L # Simpson needs an even count
 
   n <- length(times) - 1L
+
+  fine <- times[1L]
+  for (k in seq_len(n)) {
+    seg <- seq(times[k], times[k + 1L], length.out = n_sub + 1L)
+    fine <- if (k == 1L) seg else c(fine, seg[-1L])
+  }
+  # position of each t_k (k = 0, ..., n) within `fine`
+  obs_index <- c(1L, cumsum(rep(n_sub, n)) + 1L)
+
   rhs <- function(t, y, parms) {
     x <- y[1:3]
     P <- matrix(y[4:12], nrow = 3L)
@@ -33,25 +47,29 @@ sird_ga_transition <- function(times, x0, parms, n_sub = 10L) {
     dP <- J %*% P
     list(c(dx, as.vector(dP)))
   }
+  reset_P <- function(t, y, parms) {
+    y[4:12] <- as.vector(diag(3))
+    y
+  }
 
-  x_obs <- matrix(NA_real_, n + 1L, 3L)
+  y0 <- c(x0, as.vector(diag(3)))
+  event_times <- times[-1L][-n] # reset at the start of every interval after the first (t_1, ..., t_{n-1})
+  ev <- if (length(event_times) > 0L) list(func = reset_P, time = event_times) else NULL
+
+  out <- deSolve::ode(y = y0, times = fine, func = rhs, parms = parms,
+                       method = "lsoda", events = ev)
+  out <- as.matrix(out)
+
+  x_obs <- out[obs_index, 2:4, drop = FALSE]
   colnames(x_obs) <- c("s", "i", "r")
-  x_obs[1L, ] <- x0
 
   segments <- vector("list", n)
-  x_cur <- x0
   for (k in seq_len(n)) {
-    tg <- seq(times[k], times[k + 1L], length.out = n_sub + 1L)
-    y0 <- c(x_cur, as.vector(diag(3)))
-    out <- deSolve::ode(y = y0, times = tg, func = rhs, parms = parms, method = "lsoda")
-    out <- as.matrix(out)
-    x_mat <- out[, 2:4, drop = FALSE]
-    P_arr <- array(0, dim = c(3L, 3L, nrow(out)))
-    for (j in seq_len(nrow(out))) P_arr[, , j] <- matrix(out[j, 5:13], nrow = 3L)
-
-    segments[[k]] <- list(t = tg, x = x_mat, P = P_arr)
-    x_cur <- x_mat[nrow(x_mat), ]
-    x_obs[k + 1L, ] <- x_cur
+    rows <- obs_index[k]:obs_index[k + 1L]
+    x_mat <- out[rows, 2:4, drop = FALSE]
+    P_arr <- array(0, dim = c(3L, 3L, length(rows)))
+    for (j in seq_along(rows)) P_arr[, , j] <- matrix(out[rows[j], 5:13], nrow = 3L)
+    segments[[k]] <- list(t = out[rows, 1], x = x_mat, P = P_arr)
   }
 
   structure(list(x_obs = x_obs, segments = segments, parms = parms, times = times),

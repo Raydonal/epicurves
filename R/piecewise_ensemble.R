@@ -71,8 +71,18 @@ find_partition_point <- function(t, y, min_obs = 12L, criterion = "mse", beta_fi
 #'   match Simulation Scenario 2 of the manuscript).
 #' @param criterion,beta_fixed Passed to [fit_ensemble()].
 #' @param threshold Relative MSE reduction required to confirm a new
-#'   partition point (default 0.5, i.e. the split must at least halve the
-#'   MSE relative to the unsplit fit).
+#'   partition point under `confirm_criterion = "mse_threshold"` (default
+#'   0.5, i.e. the split must at least halve the MSE relative to the
+#'   unsplit fit — this is the rule described in the manuscript).
+#' @param confirm_criterion How a candidate split is confirmed.
+#'   `"mse_threshold"` (default) reproduces the manuscript's rule exactly.
+#'   `"aic"` instead compares a changepoint-penalised AIC for the split
+#'   against the unsplit fit — splitting doubles the number of growth-curve
+#'   parameters (three models re-fit on each side) and adds one degree of
+#'   freedom for the partition-point location itself, and `"aic"` is the
+#'   more conservative choice when a flat MSE-reduction threshold
+#'   over-segments noisy real series (see the package vignette for a
+#'   worked comparison on both simulated and real surveillance data).
 #' @return An object of class `piecewise_fit`: a list with `cuts` (sorted
 #'   confirmed partition points), `segments` (list of `ensemble_fit`
 #'   objects, one per final segment, each carrying the original time
@@ -82,7 +92,9 @@ find_partition_point <- function(t, y, min_obs = 12L, criterion = "mse", beta_fi
 #' @export
 fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L,
                                     min_obs = 12L, criterion = "mse",
-                                    beta_fixed = 1.5, threshold = 0.5) {
+                                    beta_fixed = 1.5, threshold = 0.5,
+                                    confirm_criterion = c("mse_threshold", "aic")) {
+  confirm_criterion <- match.arg(confirm_criterion)
   n_total <- length(y)
   t <- t %||% seq_len(n_total)
   cuts <- integer(0)
@@ -105,7 +117,26 @@ fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L
       step_log$search <- search
       step_log$mse_nosplit <- mse_nosplit
 
-      if (!is.na(search$mse_split) && search$mse_split <= (1 - threshold) * mse_nosplit) {
+      confirmed <- FALSE
+      if (!is.na(search$mse_split)) {
+        if (confirm_criterion == "mse_threshold") {
+          confirmed <- search$mse_split <= (1 - threshold) * mse_nosplit
+        } else {
+          # BIC-style comparison: splitting re-fits all three growth models
+          # on each side (doubling their parameters) and adds one degree of
+          # freedom for the partition-point location itself. The BIC
+          # penalty (k * log(n), rather than AIC's 2k) is deliberately
+          # stricter, since segments here are short (12-90 observations)
+          # relative to the 9 growth-curve parameters being fit, a regime
+          # where AIC under-penalises and a flat MSE-reduction threshold
+          # over-segments (see the package vignette).
+          k_single <- sum(vapply(nosplit$models, `[[`, numeric(1), "n_par")) + 1L
+          bic_nosplit <- n_open * log(mse_nosplit) + k_single * log(n_open)
+          bic_split <- n_open * log(search$mse_split) + 2 * k_single * log(n_open) + log(n_open)
+          confirmed <- is.finite(bic_split) && bic_split < bic_nosplit
+        }
+      }
+      if (confirmed) {
         new_cut <- open_start - 1L + search$d_hat
         cuts <- c(cuts, new_cut)
         step_log$new_cut <- new_cut

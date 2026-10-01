@@ -12,7 +12,8 @@ fit_piecewise_ensemble(
   min_obs = 12L,
   criterion = "mse",
   beta_fixed = 1.5,
-  threshold = 0.5
+  threshold = 0.5,
+  confirm_criterion = c("mse_threshold", "aic")
 )
 }
 \arguments{
@@ -32,8 +33,19 @@ match Simulation Scenario 2 of the manuscript).}
 \item{criterion, beta_fixed}{Passed to \code{\link[=fit_ensemble]{fit_ensemble()}}.}
 
 \item{threshold}{Relative MSE reduction required to confirm a new
-partition point (default 0.5, i.e. the split must at least halve the
-MSE relative to the unsplit fit).}
+partition point under \code{confirm_criterion = "mse_threshold"} (default
+0.5, i.e. the split must at least halve the MSE relative to the
+unsplit fit — this is the rule described in the manuscript).}
+
+\item{confirm_criterion}{How a candidate split is confirmed.
+\code{"mse_threshold"} (default) reproduces the manuscript's rule exactly.
+\code{"aic"} instead compares a changepoint-penalised AIC for the split
+against the unsplit fit — splitting doubles the number of growth-curve
+parameters (three models re-fit on each side) and adds one degree of
+freedom for the partition-point location itself, and \code{"aic"} is the
+more conservative choice when a flat MSE-reduction threshold
+over-segments noisy real series (see the package vignette for a
+worked comparison on both simulated and real surveillance data).}
 }
 \value{
 An object of class \code{piecewise_fit}: a list with \code{cuts} (sorted

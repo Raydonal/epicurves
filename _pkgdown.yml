@@ -1,0 +1,66 @@
+url: ~
+title: epicurves
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#0B3C5D"
+
+home:
+  title: "epicurves: reproducible epidemic-curve models"
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+
+articles:
+  - title: Article reproductions
+    navbar: Articles
+    contents:
+      - sird-ga-article
+      - piecewise-ensemble-article
+
+reference:
+  - title: "SIRD-GA: dynamics and simulation"
+    contents:
+      - sird_drift
+      - sird_jacobian
+      - sird_diffusion
+      - sird_sigma
+      - sird_R0
+      - sird_ode_solve
+      - sird_gillespie
+      - sird_ga_simulate_obs
+  - title: "SIRD-GA: estimation and inference"
+    contents:
+      - sird_ga_transition
+      - sird_ga_Ak
+      - sird_ga_Fk
+      - sird_ga_Qk
+      - sird_ga_loglik
+      - sird_ga_fit
+      - sird_ga_bootstrap
+  - title: "Growth-curve models"
+    contents:
+      - logistic_curve
+      - gompertz_curve
+      - richards_curve
+      - fit_growth_model
+  - title: "Ensemble and piecewise ensemble"
+    contents:
+      - ensemble_weights
+      - fit_ensemble
+      - ensemble_bootstrap_ci
+      - split_mse
+      - find_partition_point
+      - fit_piecewise_ensemble
+  - title: "Plotting"
+    contents:
+      - starts_with("plot_")
+  - title: "Data"
+    contents:
+      - paraiba_covid19
+      - paraiba_population
+  - title: "Utilities"
+    contents:
+      - smooth_series
