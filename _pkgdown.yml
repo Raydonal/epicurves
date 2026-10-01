@@ -39,7 +39,21 @@ reference:
       - sird_ga_Qk
       - sird_ga_loglik
       - sird_ga_fit
+      - sird_ga_fit_multistart
       - sird_ga_bootstrap
+  - title: "General compartmental engine (SEIRD-GA and other extensions)"
+    contents:
+      - new_jump_model
+      - jm_drift
+      - jm_diffusion
+      - jm_jacobian
+      - sird_model
+      - seird_model
+      - general_gillespie
+      - general_ga_simulate_obs
+      - general_ga_transition
+      - general_ga_loglik
+      - general_ga_fit
   - title: "Growth-curve models"
     contents:
       - logistic_curve
@@ -50,10 +64,14 @@ reference:
     contents:
       - ensemble_weights
       - fit_ensemble
+      - predict.ensemble_fit
       - ensemble_bootstrap_ci
       - split_mse
+      - split_mse_single
       - find_partition_point
+      - permutation_test_partition
       - fit_piecewise_ensemble
+      - predict.piecewise_fit
   - title: "Plotting"
     contents:
       - starts_with("plot_")
