@@ -26,10 +26,10 @@ Depends:
     R (>= 4.1)
 Imports:
     deSolve,
+    ggplot2,
     minpack.lm,
     stats
 Suggests:
-    ggplot2,
     dplyr,
     tidyr,
     patchwork,

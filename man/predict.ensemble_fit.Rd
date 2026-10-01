@@ -10,6 +10,8 @@
 \item{object}{An \code{ensemble_fit} object.}
 
 \item{newdata}{Numeric vector of times (defaults to \code{object$t}).}
+
+\item{...}{Unused; present for S3 consistency with \code{\link[stats:predict]{stats::predict()}}.}
 }
 \description{
 Predict the ensemble curve at arbitrary times

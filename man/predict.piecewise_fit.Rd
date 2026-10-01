@@ -12,6 +12,8 @@
 \item{newdata}{Numeric vector of times (original time scale); times
 beyond the last confirmed segment's final observation are forecast
 using that segment's ensemble fit.}
+
+\item{...}{Unused; present for S3 consistency with \code{\link[stats:predict]{stats::predict()}}.}
 }
 \description{
 Predict from a piecewise ensemble fit

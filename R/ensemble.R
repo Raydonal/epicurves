@@ -54,6 +54,7 @@ fit_ensemble <- function(t, y, criterion = c("mse", "aic"), beta_fixed = 1.5) {
 #' Predict the ensemble curve at arbitrary times
 #' @param object An `ensemble_fit` object.
 #' @param newdata Numeric vector of times (defaults to `object$t`).
+#' @param ... Unused; present for S3 consistency with [stats::predict()].
 #' @export
 predict.ensemble_fit <- function(object, newdata = NULL, ...) {
   t_new <- newdata %||% object$t

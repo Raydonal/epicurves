@@ -1,4 +1,4 @@
-# epicurves (development)
+# epicurves 0.0.0.9000
 
 Initial implementation, built to validate and reproduce the results of two
 companion manuscripts derived from the thesis.

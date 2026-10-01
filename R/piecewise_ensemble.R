@@ -173,6 +173,7 @@ fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L
 #' @param newdata Numeric vector of times (original time scale); times
 #'   beyond the last confirmed segment's final observation are forecast
 #'   using that segment's ensemble fit.
+#' @param ... Unused; present for S3 consistency with [stats::predict()].
 #' @export
 predict.piecewise_fit <- function(object, newdata, ...) {
   vapply(newdata, function(tt) {
