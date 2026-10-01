@@ -69,31 +69,57 @@ Kalman-filter likelihood surface; `smooth_series()` applies a 7-day
 centered moving average before estimation, as recommended for this
 application.
 
-```{r real-fit}
-fit_real <- sird_ga_fit(
-  y_smooth, paraiba_population, Delta = 1,
-  start = list(lambda = 0.26, gamma = 0.23, alpha = 0.02, i0 = 1e-4, p = 0.93, tau2 = 0.67^2),
-  p_max = 0.98, n_sub = 6, hessian = FALSE, control = list(maxit = 2000, reltol = 1e-11)
+```{r real-fit, eval = FALSE}
+# Each start takes 2-5 minutes; not run automatically when building the
+# vignette. See the summary table and discussion below for the results.
+ms_real <- sird_ga_fit_multistart(
+  y_smooth, paraiba_population, Delta = 1, r0_guess = 1.1,
+  infectious_period_days = c(3, 4, 5, 7, 10),
+  n_sub = 6, p_max = 0.98, control = list(maxit = 800, reltol = 1e-8)
 )
-round(fit_real$theta, 4)
-sird_R0(fit_real$theta[["lambda"]], fit_real$theta[["gamma"]], fit_real$theta[["alpha"]])
+ms_real$summary
+
+fit_real <- ms_real$best
 
 kf_real <- sird_ga_loglik(fit_real$theta, y_smooth, paraiba_population, Delta = 1,
                            n_sub = 6, keep_states = TRUE)
 plot_sird_ga_fit(y_smooth, kf_real)
 ```
 
-## A practical-identifiability finding
+## A practical-identifiability finding: two basins, not one
 
-Starting the optimiser at the published parameter point
-($\lambda=0.26,\gamma=0.23,\alpha=0.02,p=0.93,\tau=0.67$) yields a
-log-likelihood almost as high as the value found by unconstrained search
-from a diffuse starting point, indicating a flat ridge in the likelihood
-surface along which $\lambda$ and $\gamma+\alpha$ trade off while preserving
-$R_0$ and the shape of the fitted curve. This is a known weak-identifiability
-feature of SIR/SIRD models estimated from incidence-only series (the
-transmission and removal rates are identified mainly through their ratio and
-through the curve's inflection timing, not independently), and is reported
-as a limitation in Article 1's discussion rather than concealed. We
-recommend reporting a profile likelihood or a multi-start sensitivity
-analysis alongside any single point estimate for this application.
+Running `sird_ga_fit_multistart()` from five starting infectious periods
+(3, 4, 5, 7 and 10 days) on the smoothed series produces:
+
+| start (days) | loglik | $R_0$ | $\lambda$ | $\gamma$ | $\alpha$ | $\gamma+\alpha$ |
+|---|---|---|---|---|---|---|
+| 3  | 2947.3 | 1.027 | 0.736 | 0.541 | 0.175 | 0.716 |
+| 4  | 2947.3 | 1.027 | 0.737 | 0.517 | 0.200 | 0.717 |
+| 5  | 2947.3 | 1.027 | 0.736 | 0.683 | 0.033 | 0.716 |
+| 7  | 2947.3 | 1.027 | 0.736 | 0.716 | 0.000 | 0.716 |
+| 10 | 2924.0 | 1.034 | 0.229 | 0.093 | 0.128 | 0.221 |
+
+Two distinct optima emerge, not a single flat ridge. Four of five starts
+converge to a **fast-dynamics** basin: a stable optimum with
+$R_0\approx1.03$ in which $\gamma$ and $\alpha$ individually vary freely
+(0.00-0.70) while their sum stays pinned at $\gamma+\alpha\approx0.72$
+(mean infectious period $\approx1.4$ days) — every split along this ridge
+attains the *same* log-likelihood to one decimal place. The fifth start
+converges to a **slow-dynamics** optimum, log-likelihood only $\approx$23
+nats lower, with $\gamma+\alpha\approx0.22$ (mean infectious period
+$\approx4.5$ days) — closely matching the published
+$\lambda=0.26,\gamma+\alpha=0.25$ and consistent with established COVID-19
+natural-history estimates, whereas the fast basin's 1.4-day infectious
+period is not.
+
+This is a textbook case for combining the raw likelihood with
+epidemiological prior knowledge rather than reporting the unconstrained
+MLE alone: the data mildly prefer the fast-dynamics basin, but its implied
+infectious period is biologically implausible, while the slightly-worse
+slow-dynamics basin is the epidemiologically defensible choice. Both the
+$\gamma$/$\alpha$ ridge and the two-basin structure are consistent with,
+and extend, the thesis's own appendix finding that $\gamma$ and $\alpha$
+are estimated far less precisely than $\lambda$ or $R_0$ in simulation.
+We recommend `sird_ga_fit_multistart()` as standard practice for any
+SIR/SIRD Kalman-filter application to real incidence data, and report both
+basins transparently in Article 1 rather than a single point estimate.
