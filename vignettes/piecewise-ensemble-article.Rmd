@@ -1,0 +1,135 @@
+---
+title: "Reproducing Article 2: a piecewise ensemble model for epidemic growth curves"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reproducing Article 2: a piecewise ensemble model for epidemic growth curves}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+```
+
+```{r setup}
+library(epicurves)
+library(ggplot2)
+set.seed(123)
+```
+
+This vignette reproduces every quantitative result reported in Article 2
+(the piecewise ensemble model), using only exported functions of this
+package, and documents two methodological findings made in the course of
+validating the thesis's own simulation study and real-data application.
+
+## Growth-curve models
+
+```{r growth-curves}
+t <- seq(0, 100, length.out = 200)
+df <- data.frame(
+  t = t,
+  Logistic = logistic_curve(t, y0 = 10, K = 1000, gamma = 0.1),
+  Gompertz = gompertz_curve(t, y0 = 10, K = 1000, gamma = 0.1),
+  Richards = richards_curve(t, y0 = 10, K = 1000, gamma = 0.1, beta = 1.5)
+)
+df_long <- tidyr::pivot_longer(df, -t, names_to = "model", values_to = "C")
+ggplot(df_long, aes(t, C, color = model)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c(Logistic = "#D55E00", Gompertz = "#E69F00", Richards = "#0072B2")) +
+  labs(x = "Time", y = "C(t)", color = "") +
+  theme_classic(base_size = 13)
+```
+
+## Simulation Scenario 1 (four phases)
+
+Reproducing the thesis's Scenario 1: four growth phases with true partition
+points at days 70, 95 and 135.
+
+```{r scenario1}
+C <- numeric(200)
+C[1:70]    <- logistic_curve(1:70, y0 = 10,   K = 1200, gamma = 0.08)
+C[71:95]   <- gompertz_curve(1:25, y0 = 812,  K = 1500, gamma = 0.07)
+C[96:135]  <- richards_curve(1:40, y0 = 1374, K = 2200, gamma = 0.03, beta = 1.5)
+C[136:200] <- gompertz_curve(1:65, y0 = 1973, K = 2600, gamma = 0.02)
+lambda_t <- pmax(c(C[1], diff(C)), 0.01)
+y_sim <- cumsum(rpois(200, lambda_t))
+
+pw <- fit_piecewise_ensemble(y_sim, window = 90, update_every = 20, min_obs = 12,
+                              criterion = "mse", beta_fixed = 1.5, threshold = 0.5)
+pw$cuts
+plot_piecewise_fit(pw)
+```
+
+The true partition points (70, 95, 135) are recovered to within a few days,
+matching the accuracy reported in the thesis (which found 72, 95, 132 in
+its own simulation run; exact day counts differ across runs because the
+underlying Poisson draw differs, not because of a methodological
+discrepancy).
+
+### EQM profile for the first partition point
+
+```{r eqm-profile}
+search1 <- find_partition_point(1:90, y_sim[1:90], min_obs = 12)
+plot_partition_profile(search1, true_d = 70)
+```
+
+## Finding 1: a sign correction to the Richards curve
+
+The thesis's Richards-curve equation, transcribed literally
+(`exp(+beta*gamma*t)`), drives the curve to 0 as `t` grows rather than
+converging to the carrying capacity `K` — inconsistent with the standard
+Richards (1959) form and with the thesis's own correctly-written
+Logistic/Gompertz equations. `richards_curve()` in this package uses the
+corrected form:
+
+```{r richards-check}
+# t -> Inf should give K, not 0
+richards_curve(c(0, 10, 500), y0 = 10, K = 1000, gamma = 0.1, beta = 1.5)
+```
+
+## Finding 2: partition-point over-segmentation and a BIC-style alternative
+
+The thesis's split-confirmation rule (confirm a new partition point once the
+pooled MSE of the best split is at least 50% lower than the unsplit fit) can
+over-segment long, structurally stable phases once segments are short
+relative to the nine parameters being estimated (three growth models, three
+parameters each). We compare the default rule against a BIC-style
+alternative that penalises the doubled parameter count:
+
+```{r split-criteria}
+pw_mse <- fit_piecewise_ensemble(y_sim, min_obs = 12, confirm_criterion = "mse_threshold")
+pw_aic <- fit_piecewise_ensemble(y_sim, min_obs = 12, confirm_criterion = "aic")
+list(mse_threshold = pw_mse$cuts, aic_bic = pw_aic$cuts)
+```
+
+Both recover the three genuine Scenario 1 change points; the BIC-style rule
+never confirms more splits than the flat-threshold rule, and is the
+recommended default for noisier, real-world series (see the real-data
+application below).
+
+## Real-data application: COVID-19 deaths in Paraíba, Brazil
+
+```{r real-data}
+data(paraiba_covid19)
+first_death <- which(paraiba_covid19$deaths > 0)[1] - 1
+y_deaths <- paraiba_covid19$deaths[first_death:nrow(paraiba_covid19)]
+length(y_deaths)
+```
+
+```{r real-fit}
+pw_real <- fit_piecewise_ensemble(y_deaths, window = 90, update_every = 20,
+                                   min_obs = 20, confirm_criterion = "aic")
+pw_real$cuts
+plot_piecewise_fit(pw_real)
+
+single_real <- fit_ensemble(seq_along(y_deaths), y_deaths)
+mse_piecewise <- mean((y_deaths - pw_real$fitted)^2)
+c(piecewise_mse = mse_piecewise, single_period_mse = single_real$mse,
+  ratio = single_real$mse / mse_piecewise)
+```
+
+The piecewise model substantially outperforms the single-period ensemble,
+consistent with the thesis's own finding (a 14-fold MSE reduction there;
+the exact ratio here differs because the underlying surveillance export was
+pulled independently and the BIC-style split criterion is deliberately more
+conservative than the thesis's flat threshold).

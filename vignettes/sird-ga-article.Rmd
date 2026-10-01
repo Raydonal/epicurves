@@ -1,0 +1,99 @@
+---
+title: "Reproducing Article 1: the SIRD-GA model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reproducing Article 1: the SIRD-GA model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+```
+
+```{r setup}
+library(epicurves)
+set.seed(1)
+```
+
+This vignette reproduces the simulation study and real-data application of
+Article 1 (the SIRD-GA model) using only exported functions of this
+package.
+
+## Basic reproduction number and ODE mass balance
+
+```{r r0}
+sird_R0(lambda = 0.4, gamma = 0.15, alpha = 0.08)
+out <- sird_ode_solve(times = 0:200, x0 = c(s = 0.999, i = 0.001, r = 0),
+                       parms = list(lambda = 0.4, gamma = 0.15, alpha = 0.08))
+range(out$s + out$i + out$r + out$d) # should be 1 throughout
+```
+
+## Simulation study
+
+```{r sim}
+N <- 20000
+theta_true <- c(lambda = 0.4, gamma = 0.15, alpha = 0.08, s0 = 0.999, i0 = 0.001,
+                 r0 = 0, p = 0.6, tau2 = 0.2)
+sim <- sird_ga_simulate_obs(N, S0 = round(N * 0.999), I0 = round(N * 0.001), R0 = 0,
+                             lambda = theta_true[["lambda"]], gamma = theta_true[["gamma"]],
+                             alpha = theta_true[["alpha"]], p = theta_true[["p"]],
+                             tau2 = theta_true[["tau2"]], Tmax = 100, Delta = 1)
+
+fit <- sird_ga_fit(sim$y, N, Delta = 1,
+                    start = list(lambda = 0.3, gamma = 0.1, alpha = 0.1, i0 = 0.002,
+                                 p = 0.5, tau2 = 0.3),
+                    n_sub = 6, hessian = FALSE, control = list(maxit = 1000, reltol = 1e-9))
+round(fit$theta, 4)
+sird_R0(fit$theta[["lambda"]], fit$theta[["gamma"]], fit$theta[["alpha"]])
+```
+
+Transmission rate and $R_0$ recover well; the recovery/mortality split
+($\gamma$ vs. $\alpha$) is only partially identified from infection-only
+data, consistent with the thesis's own appendix simulation (Scenarios 4-5),
+where the sum $\gamma+\alpha$ is recovered far more precisely than either
+rate individually.
+
+## Real-data application: COVID-19 first wave, Paraíba, Brazil
+
+```{r real-data}
+data(paraiba_covid19)
+data(paraiba_population)
+y_raw <- paraiba_covid19$new_cases
+y_smooth <- smooth_series(y_raw, 7)
+```
+
+Raw daily case counts carry pronounced day-of-week reporting artefacts
+(lower weekend counts, Monday catch-up spikes) that materially affect the
+Kalman-filter likelihood surface; `smooth_series()` applies a 7-day
+centered moving average before estimation, as recommended for this
+application.
+
+```{r real-fit}
+fit_real <- sird_ga_fit(
+  y_smooth, paraiba_population, Delta = 1,
+  start = list(lambda = 0.26, gamma = 0.23, alpha = 0.02, i0 = 1e-4, p = 0.93, tau2 = 0.67^2),
+  p_max = 0.98, n_sub = 6, hessian = FALSE, control = list(maxit = 2000, reltol = 1e-11)
+)
+round(fit_real$theta, 4)
+sird_R0(fit_real$theta[["lambda"]], fit_real$theta[["gamma"]], fit_real$theta[["alpha"]])
+
+kf_real <- sird_ga_loglik(fit_real$theta, y_smooth, paraiba_population, Delta = 1,
+                           n_sub = 6, keep_states = TRUE)
+plot_sird_ga_fit(y_smooth, kf_real)
+```
+
+## A practical-identifiability finding
+
+Starting the optimiser at the published parameter point
+($\lambda=0.26,\gamma=0.23,\alpha=0.02,p=0.93,\tau=0.67$) yields a
+log-likelihood almost as high as the value found by unconstrained search
+from a diffuse starting point, indicating a flat ridge in the likelihood
+surface along which $\lambda$ and $\gamma+\alpha$ trade off while preserving
+$R_0$ and the shape of the fitted curve. This is a known weak-identifiability
+feature of SIR/SIRD models estimated from incidence-only series (the
+transmission and removal rates are identified mainly through their ratio and
+through the curve's inflection timing, not independently), and is reported
+as a limitation in Article 1's discussion rather than concealed. We
+recommend reporting a profile likelihood or a multi-start sensitivity
+analysis alongside any single point estimate for this application.

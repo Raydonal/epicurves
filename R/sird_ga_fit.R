@@ -161,3 +161,67 @@ sird_ga_bootstrap <- function(fit, y, N, Delta = 1,
   colnames(ci) <- c("lower", "upper")
   list(boot_theta = boot_theta, ci = ci, method = method, B = B, level = level)
 }
+
+#' Multi-start SIRD-GA fitting, with a practical-identifiability summary
+#'
+#' Fits the SIRD-GA model from several starting points spanning a range of
+#' assumed mean infectious periods, and reports all converged optima sorted
+#' by log-likelihood. This is useful because, on real surveillance data, the
+#' SIRD-GA log-likelihood can have a near-flat ridge along which
+#' `lambda` trades off against `gamma + alpha` while `R0` and the shape of
+#' the fitted curve stay essentially unchanged — a known weak-identifiability
+#' feature of SIR/SIRD models fit to incidence-only series (the removal
+#' rate is identified mainly through its sum with the transmission rate and
+#' the curve's inflection timing, not independently). Reporting the single
+#' best-fitting optimum without checking for this ridge can be misleading;
+#' this function makes the ridge (if present) visible.
+#'
+#' @inheritParams sird_ga_fit
+#' @param r0_guess Starting guess for \eqn{R_0} (used to scale `lambda`
+#'   across starts, together with each candidate infectious period).
+#' @param infectious_period_days Numeric vector of candidate mean
+#'   infectious periods \eqn{1/(\gamma+\alpha)} (in days) to start from
+#'   (default spans 2-10 days, covering typical respiratory-infection
+#'   priors).
+#' @param alpha_frac Fraction of the total removal rate `gamma + alpha`
+#'   assigned to `alpha` at each starting point (default 0.1).
+#' @param p0,tau2_0,i0_0 Starting values shared across all starts for `p`,
+#'   `tau2` and `i0`.
+#' @param ... Further arguments passed to [sird_ga_fit()].
+#' @return A list with `results` (a list of [sird_ga_fit()] outputs, one per
+#'   start, in the same order as `infectious_period_days`), `summary` (a
+#'   data frame with the starting infectious period, final log-likelihood,
+#'   `R0` and key parameter estimates for each start, sorted best-first) and
+#'   `best` (the single best-fitting result).
+#' @export
+sird_ga_fit_multistart <- function(y, N, Delta = 1, r0_guess = 1.1,
+                                    infectious_period_days = c(2, 3, 4, 5, 7, 10),
+                                    alpha_frac = 0.1, p0 = 0.9, tau2_0 = 1,
+                                    i0_0 = 1e-4, ...) {
+  results <- vector("list", length(infectious_period_days))
+  for (j in seq_along(infectious_period_days)) {
+    removal <- 1 / infectious_period_days[j]
+    start <- list(lambda = r0_guess * removal, gamma = (1 - alpha_frac) * removal,
+                   alpha = alpha_frac * removal, i0 = i0_0, p = p0, tau2 = tau2_0)
+    results[[j]] <- tryCatch(sird_ga_fit(y, N, Delta = Delta, start = start, hessian = FALSE, ...),
+                              error = function(e) NULL)
+  }
+
+  summary_df <- do.call(rbind, lapply(seq_along(results), function(j) {
+    r <- results[[j]]
+    if (is.null(r)) {
+      return(data.frame(infectious_period_start = infectious_period_days[j],
+                          loglik = NA_real_, R0 = NA_real_,
+                          lambda = NA_real_, gamma = NA_real_, alpha = NA_real_,
+                          p = NA_real_, tau2 = NA_real_))
+    }
+    data.frame(infectious_period_start = infectious_period_days[j], loglik = r$loglik,
+               R0 = sird_R0(r$theta[["lambda"]], r$theta[["gamma"]], r$theta[["alpha"]]),
+               lambda = r$theta[["lambda"]], gamma = r$theta[["gamma"]],
+               alpha = r$theta[["alpha"]], p = r$theta[["p"]], tau2 = r$theta[["tau2"]])
+  }))
+  summary_df <- summary_df[order(-summary_df$loglik), ]
+
+  best_idx <- which.max(vapply(results, function(r) if (is.null(r)) -Inf else r$loglik, numeric(1)))
+  list(results = results, summary = summary_df, best = results[[best_idx]])
+}

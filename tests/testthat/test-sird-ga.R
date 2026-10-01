@@ -14,6 +14,24 @@ test_that("sird_ga_loglik is finite at a sensible parameter value and -Inf outsi
   expect_equal(sird_ga_loglik(bad_theta, sim$y, N), -Inf)
 })
 
+test_that("sird_ga_fit_multistart returns one result per starting infectious period, sorted by loglik", {
+  skip_on_cran()
+  set.seed(12)
+  N <- 20000
+  theta_true <- c(lambda = 0.4, gamma = 0.15, alpha = 0.08, s0 = 0.999, i0 = 0.001,
+                   r0 = 0, p = 0.6, tau2 = 0.2)
+  sim <- sird_ga_simulate_obs(N, S0 = round(N * 0.999), I0 = round(N * 0.001), R0 = 0,
+                               lambda = theta_true[["lambda"]], gamma = theta_true[["gamma"]],
+                               alpha = theta_true[["alpha"]], p = theta_true[["p"]],
+                               tau2 = theta_true[["tau2"]], Tmax = 80, Delta = 1)
+  ms <- sird_ga_fit_multistart(sim$y, N, Delta = 1, r0_guess = 1.5,
+                                infectious_period_days = c(3, 5, 8), n_sub = 6,
+                                control = list(maxit = 500, reltol = 1e-8))
+  expect_equal(nrow(ms$summary), 3L)
+  expect_true(all(diff(ms$summary$loglik) <= 0)) # sorted best-first (non-increasing)
+  expect_identical(ms$best$loglik, max(ms$summary$loglik, na.rm = TRUE))
+})
+
 test_that("sird_ga_fit recovers R0 and lambda to reasonable accuracy on simulated data", {
   skip_on_cran()
   set.seed(11)
