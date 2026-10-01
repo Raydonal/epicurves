@@ -83,6 +83,21 @@ find_partition_point <- function(t, y, min_obs = 12L, criterion = "mse", beta_fi
 #'   more conservative choice when a flat MSE-reduction threshold
 #'   over-segments noisy real series (see the package vignette for a
 #'   worked comparison on both simulated and real surveillance data).
+#'   `"permutation"` instead performs a formal hypothesis test
+#'   ([permutation_test_partition()]): the candidate split is confirmed
+#'   only if its MSE reduction is unlikely under a null, unsplit growth
+#'   process, at level `alpha`, properly accounting for the multiple
+#'   comparisons implicit in scanning the whole candidate grid. This is
+#'   the criterion we recommend when statistical significance, not just a
+#'   descriptive rule, is required (e.g. for direct comparison against
+#'   nonparametric permutation-based detectors such as
+#'   \code{ecp::e.divisive}); it is markedly more expensive
+#'   computationally than the other two.
+#' @param alpha Significance level used only when
+#'   `confirm_criterion = "permutation"`.
+#' @param B Number of permutation-test null replicates, used only when
+#'   `confirm_criterion = "permutation"`; passed to
+#'   [permutation_test_partition()].
 #' @return An object of class `piecewise_fit`: a list with `cuts` (sorted
 #'   confirmed partition points), `segments` (list of `ensemble_fit`
 #'   objects, one per final segment, each carrying the original time
@@ -93,7 +108,8 @@ find_partition_point <- function(t, y, min_obs = 12L, criterion = "mse", beta_fi
 fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L,
                                     min_obs = 12L, criterion = "mse",
                                     beta_fixed = 1.5, threshold = 0.5,
-                                    confirm_criterion = c("mse_threshold", "aic")) {
+                                    confirm_criterion = c("mse_threshold", "aic", "permutation"),
+                                    alpha = 0.05, B = 99L) {
   confirm_criterion <- match.arg(confirm_criterion)
   n_total <- length(y)
   t <- t %||% seq_len(n_total)
@@ -121,7 +137,7 @@ fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L
       if (!is.na(search$mse_split)) {
         if (confirm_criterion == "mse_threshold") {
           confirmed <- search$mse_split <= (1 - threshold) * mse_nosplit
-        } else {
+        } else if (confirm_criterion == "aic") {
           # BIC-style comparison: splitting re-fits all three growth models
           # on each side (doubling their parameters) and adds one degree of
           # freedom for the partition-point location itself. The BIC
@@ -134,6 +150,10 @@ fit_piecewise_ensemble <- function(y, t = NULL, window = 90L, update_every = 20L
           bic_nosplit <- n_open * log(mse_nosplit) + k_single * log(n_open)
           bic_split <- n_open * log(search$mse_split) + 2 * k_single * log(n_open) + log(n_open)
           confirmed <- is.finite(bic_split) && bic_split < bic_nosplit
+        } else {
+          pt <- permutation_test_partition(t_open, y_open, min_obs, B = B, beta_fixed = beta_fixed)
+          step_log$permutation_test <- pt
+          confirmed <- pt$p_value < alpha
         }
       }
       if (confirmed) {
@@ -182,4 +202,111 @@ predict.piecewise_fit <- function(object, newdata, ...) {
     t_rel <- tt - seg$t_range[1L] + 1L
     predict(seg, newdata = t_rel)
   }, numeric(1))
+}
+
+#' Best single-model split MSE at a candidate partition point (fast proxy)
+#'
+#' A single-growth-model analogue of [split_mse()], roughly three times
+#' cheaper (one model fit per side instead of three), used internally by
+#' [permutation_test_partition()] to generate the null distribution of the
+#' grid-maximum MSE-reduction statistic at a cost that keeps a full
+#' permutation test tractable. The model used is `null_model` (default
+#' `"gompertz"`), fixed across the whole null simulation, not re-selected
+#' per replicate.
+#' @inheritParams split_mse
+#' @param null_model One of `"logistic"`, `"gompertz"`, `"richards"`.
+#' @keywords internal
+split_mse_single <- function(t, y, d, null_model = "gompertz", beta_fixed = 1.5) {
+  n <- length(y)
+  idx1 <- seq_len(d); idx2 <- (d + 1L):n
+  f1 <- tryCatch(fit_growth_model(t[idx1], y[idx1], null_model, beta_fixed = beta_fixed),
+                  error = function(e) NULL)
+  f2 <- tryCatch(fit_growth_model(t[idx2] - d, y[idx2], null_model, beta_fixed = beta_fixed),
+                  error = function(e) NULL)
+  if (is.null(f1) || is.null(f2)) return(NA_real_)
+  (sum((y[idx1] - f1$fitted)^2) + sum((y[idx2] - f2$fitted)^2)) / n
+}
+
+#' Permutation test for a single candidate structural change point
+#'
+#' Tests whether the observed reduction in pooled MSE from the best
+#' candidate split in [find_partition_point()] is larger than what a
+#' single homogeneous (unsplit) growth process would produce by chance,
+#' properly accounting for the multiple comparisons implicit in scanning
+#' the whole candidate grid: the null distribution is built from the
+#' *grid-maximum* MSE reduction in each of `B` parametric-bootstrap
+#' replicates simulated from the unsplit null fit, following the same
+#' logic as the permutation test of \code{ecp::e.divisive}
+#' (Matteson & James, 2013) but specialised to parametric growth curves
+#' rather than a general multivariate distributional distance. For
+#' computational tractability, the null replicates' grid search uses a
+#' single growth model ([split_mse_single()]) rather than the full
+#' three-model ensemble used for the reported fit; this is an
+#' approximation, disclosed here rather than left implicit.
+#'
+#' @param t,y Time index and cumulative counts of the open window.
+#' @param min_obs Minimum segment length (as in [find_partition_point()]).
+#' @param B Number of parametric-bootstrap null replicates.
+#' @param null_model Growth model used for the (cheaper) null-replicate
+#'   grid searches; defaults to whichever of the three models best fits
+#'   the unsplit window.
+#' @param beta_fixed Passed to the growth-curve fits.
+#' @param use_ensemble_null Logical. If `TRUE`, the null replicates are
+#'   generated from, and re-fit with, the full three-model ensemble
+#'   (matching the observed statistic exactly, at roughly three times the
+#'   cost); if `FALSE` (default), the cheaper single-model proxy of
+#'   [split_mse_single()] is used. We found the single-model proxy
+#'   under-powered in simulation (it can fail to confirm genuine change
+#'   points detected by the full ensemble); `use_ensemble_null = TRUE` is
+#'   recommended whenever the extra cost is affordable.
+#' @return A list with `p_value`, `observed_reduction` (MSE_nosplit minus
+#'   MSE at the best split), `null_reductions` (the `B` simulated null
+#'   maxima) and `d_hat` (the best split, as in [find_partition_point()]).
+#' @export
+permutation_test_partition <- function(t, y, min_obs = 12L, B = 99L,
+                                        null_model = NULL, beta_fixed = 1.5,
+                                        use_ensemble_null = TRUE) {
+  n <- length(y)
+  nosplit <- fit_ensemble(t, y, "mse", beta_fixed)
+  search <- find_partition_point(t, y, min_obs, "mse", beta_fixed)
+  observed_reduction <- nosplit$mse - search$mse_split
+  grid <- seq.int(min_obs, n - min_obs)
+
+  if (use_ensemble_null) {
+    # Null replicates simulated from, and re-fit with, the same full
+    # ensemble used for the observed statistic: an exact (if ~3x costlier)
+    # analogue of the single-model proxy below.
+    null_reductions <- vapply(seq_len(B), function(b) {
+      y_star <- stats::rpois(n, lambda = pmax(nosplit$fitted, 1e-6))
+      nosplit_star <- tryCatch(fit_ensemble(t, y_star, "mse", beta_fixed), error = function(e) NULL)
+      if (is.null(nosplit_star)) return(NA_real_)
+      profile <- vapply(grid, function(d) split_mse(t, y_star, d, "mse", beta_fixed)$mse, numeric(1))
+      if (all(is.na(profile))) return(NA_real_)
+      nosplit_star$mse - min(profile, na.rm = TRUE)
+    }, numeric(1))
+    null_model <- "ensemble"
+  } else {
+    if (is.null(null_model)) {
+      null_model <- names(nosplit$models)[which.min(vapply(nosplit$models, `[[`, numeric(1), "mse"))]
+    }
+    null_fit <- fit_growth_model(t, y, null_model, beta_fixed = beta_fixed)
+    null_reductions <- vapply(seq_len(B), function(b) {
+      y_star <- stats::rpois(n, lambda = pmax(null_fit$fitted, 1e-6))
+      # Refit the null model to y_star itself (not to the original data) so
+      # that the "no-split" reference absorbs the same refitting advantage
+      # the split profile gets; otherwise min(profile) is compared against
+      # the true generating variance rather than an equally-overfit
+      # baseline, which makes any split look spuriously better.
+      nosplit_star <- tryCatch(fit_growth_model(t, y_star, null_model, beta_fixed = beta_fixed),
+                                 error = function(e) NULL)
+      if (is.null(nosplit_star)) return(NA_real_)
+      profile <- vapply(grid, function(d) split_mse_single(t, y_star, d, null_model, beta_fixed), numeric(1))
+      if (all(is.na(profile))) return(NA_real_)
+      nosplit_star$mse - min(profile, na.rm = TRUE)
+    }, numeric(1))
+  }
+
+  p_value <- (sum(null_reductions >= observed_reduction, na.rm = TRUE) + 1) / (sum(!is.na(null_reductions)) + 1)
+  list(p_value = p_value, observed_reduction = observed_reduction,
+       null_reductions = null_reductions, d_hat = search$d_hat, null_model = null_model)
 }

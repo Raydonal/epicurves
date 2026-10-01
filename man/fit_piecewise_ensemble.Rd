@@ -13,7 +13,9 @@ fit_piecewise_ensemble(
   criterion = "mse",
   beta_fixed = 1.5,
   threshold = 0.5,
-  confirm_criterion = c("mse_threshold", "aic")
+  confirm_criterion = c("mse_threshold", "aic", "permutation"),
+  alpha = 0.05,
+  B = 99L
 )
 }
 \arguments{
@@ -45,7 +47,24 @@ parameters (three models re-fit on each side) and adds one degree of
 freedom for the partition-point location itself, and \code{"aic"} is the
 more conservative choice when a flat MSE-reduction threshold
 over-segments noisy real series (see the package vignette for a
-worked comparison on both simulated and real surveillance data).}
+worked comparison on both simulated and real surveillance data).
+\code{"permutation"} instead performs a formal hypothesis test
+(\code{\link[=permutation_test_partition]{permutation_test_partition()}}): the candidate split is confirmed
+only if its MSE reduction is unlikely under a null, unsplit growth
+process, at level \code{alpha}, properly accounting for the multiple
+comparisons implicit in scanning the whole candidate grid. This is
+the criterion we recommend when statistical significance, not just a
+descriptive rule, is required (e.g. for direct comparison against
+nonparametric permutation-based detectors such as
+\code{ecp::e.divisive}); it is markedly more expensive
+computationally than the other two.}
+
+\item{alpha}{Significance level used only when
+\code{confirm_criterion = "permutation"}.}
+
+\item{B}{Number of permutation-test null replicates, used only when
+\code{confirm_criterion = "permutation"}; passed to
+\code{\link[=permutation_test_partition]{permutation_test_partition()}}.}
 }
 \value{
 An object of class \code{piecewise_fit}: a list with \code{cuts} (sorted
