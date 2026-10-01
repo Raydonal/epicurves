@@ -24,6 +24,30 @@ companion manuscripts derived from the thesis.
   Article 2 as a robustness improvement, and as a direct response to the
   2023 referees' novelty concerns about the (non-piecewise) precursor
   paper.
+- **Generalized compartmental engine + SEIRD-GA.** `new_jump_model()` /
+  `general_ga_transition()` / `general_ga_loglik()` / `general_ga_fit()`
+  generalize the hand-derived SIRD-GA machinery to arbitrary compartmental
+  structure (numerical rather than analytic Jacobian). Cross-validated
+  against the original SIRD-GA engine on identical data (log-likelihoods
+  agree to within 0.03%). `seird_model()` demonstrates a four-compartment
+  extension (adds an Exposed compartment); MLE on simulated data recovers
+  R0 exactly (2.500 vs true 2.500) and lambda/gamma/alpha within 18%.
+- **Permutation-test partition criterion, and its limits.**
+  `fit_piecewise_ensemble(confirm_criterion = "permutation")` implements a
+  formal, multiplicity-corrected hypothesis test (`permutation_test_partition()`),
+  following Matteson & James (2013)'s e.divisive logic but specialized to
+  parametric growth curves. Found to be underpowered at a computationally
+  feasible replicate count (B=29): p=0.23 for a genuine, obvious change
+  point that both heuristic criteria detect easily. Documented as a
+  genuine cost/power trade-off in Article 2, not hidden.
+- **External nonparametric detectors over-segment this data class.**
+  Benchmarked `ecp::ks.cp3o` and `ecp::e.divisive` against the piecewise
+  ensemble: both are 2-4 orders of magnitude faster but substantially
+  over-segment smoothly-varying growth curves (e.divisive: 8 spurious
+  interior points on Scenario 1's 3-true-changepoint series), because
+  they assume approximately piecewise-stationary data and growth phases
+  are never actually stationary. A real, reportable finding, not a
+  configuration error.
 - **SIRD-GA real-data identifiability: two basins.** Fitting SIRD-GA to raw
   daily case counts is sensitive to day-of-week reporting artefacts; a
   7-day centered rolling average (`smooth_series()`) is recommended before
