@@ -1,0 +1,153 @@
+#' Maximum (approximate) likelihood estimation for the SIRD-GA model
+#'
+#' Estimates `theta = (lambda, gamma, alpha, i0, p, tau2)` (and optionally
+#' `r0`) by Nelder-Mead maximisation of the Kalman-filter approximate
+#' log-likelihood ([sird_ga_loglik()]), following the estimation strategy
+#' described in the SIRD-GA manuscript. Positivity and unit-interval
+#' constraints are enforced through a log/logit reparametrisation, so the
+#' optimiser itself runs unconstrained.
+#'
+#' @param y Numeric vector of observed infectious counts, `y_0, ..., y_n`.
+#' @param N Population size.
+#' @param Delta Time step between observations.
+#' @param start Named numeric vector/list with starting values for
+#'   `lambda`, `gamma`, `alpha`, `i0`, `p`, `tau2` (and `r0` if
+#'   `estimate_r0 = TRUE`).
+#' @param r0_fixed Value at which `r0` is held fixed when
+#'   `estimate_r0 = FALSE` (default `0`, appropriate for data starting at
+#'   or near the onset of the epidemic).
+#' @param estimate_r0 Logical; estimate `r0` jointly instead of fixing it.
+#' @param n_sub,Q0_diag Passed to [sird_ga_loglik()].
+#' @param control List of control parameters passed to [stats::optim()].
+#' @param hessian Logical; compute the numerical Hessian in the
+#'   unconstrained parametrisation (used only for a quick asymptotic
+#'   diagnostic — see [sird_ga_bootstrap()] for the inferential confidence
+#'   intervals reported in the manuscript).
+#'
+#' @return A list with elements `theta` (named vector of MLEs in natural
+#'   scale), `loglik`, `convergence`, `optim_fit` (raw [stats::optim()]
+#'   output in the unconstrained parametrisation), and `free_se` (delta-free
+#'   standard errors on the unconstrained scale, or `NULL`).
+#' @export
+sird_ga_fit <- function(y, N, Delta = 1, start, r0_fixed = 0,
+                         estimate_r0 = FALSE, n_sub = 10L, Q0_diag = 1e-8,
+                         control = list(maxit = 3000, reltol = 1e-10),
+                         hessian = TRUE) {
+  start <- as.list(start)
+
+  to_free <- function(th) {
+    v <- c(log(th$lambda), log(th$gamma), log(th$alpha),
+           stats::qlogis(th$i0), stats::qlogis(th$p), log(th$tau2))
+    if (estimate_r0) {
+      r0_frac <- th$r0 / (1 - th$i0)
+      v <- c(v, stats::qlogis(max(min(r0_frac, 1 - 1e-8), 1e-8)))
+    }
+    v
+  }
+  from_free <- function(v) {
+    lambda <- exp(v[1]); gamma <- exp(v[2]); alpha <- exp(v[3])
+    i0 <- stats::plogis(v[4]); p <- stats::plogis(v[5]); tau2 <- exp(v[6])
+    r0 <- if (estimate_r0) (1 - i0) * stats::plogis(v[7]) else r0_fixed
+    s0 <- 1 - i0 - r0
+    c(lambda = lambda, gamma = gamma, alpha = alpha,
+      s0 = s0, i0 = i0, r0 = r0, p = p, tau2 = tau2)
+  }
+
+  negloglik <- function(v) {
+    theta <- from_free(v)
+    ll <- sird_ga_loglik(theta, y = y, N = N, Delta = Delta,
+                          n_sub = n_sub, Q0_diag = Q0_diag)
+    if (!is.finite(ll)) return(1e10)
+    -ll
+  }
+
+  v0 <- to_free(start)
+  fit <- stats::optim(v0, negloglik, method = "Nelder-Mead",
+                       control = control, hessian = hessian)
+
+  theta_hat <- from_free(fit$par)
+  free_se <- NULL
+  if (hessian && !is.null(fit$hessian)) {
+    free_se <- tryCatch(sqrt(diag(solve(fit$hessian))), error = function(e) NULL)
+  }
+
+  list(theta = theta_hat, loglik = -fit$value, convergence = fit$convergence,
+       optim_fit = fit, free_se = free_se,
+       to_free = to_free, from_free = from_free,
+       settings = list(N = N, Delta = Delta, n_sub = n_sub, Q0_diag = Q0_diag))
+}
+
+#' Parametric bootstrap confidence intervals for the SIRD-GA MLE
+#'
+#' Two bootstrap schemes are supported. `method = "gillespie"` simulates `B`
+#' independent epidemic trajectories and surveillance records from the
+#' fitted parameters via the exact jump-process simulator
+#' ([sird_ga_simulate_obs()]) and re-estimates the model on each replicate —
+#' appropriate when extinction risk is low. `method = "residual"` resamples
+#' the standardised one-step-ahead Kalman residuals of the fitted model with
+#' replacement, reconstructs bootstrap observation series around the fitted
+#' predictive mean, and re-estimates the model on each — appropriate for
+#' real-data settings near the epidemic threshold, where re-simulating the
+#' jump process can produce early extinction.
+#'
+#' @param fit Object returned by [sird_ga_fit()].
+#' @param y Original observed series used to produce `fit`.
+#' @param N,Delta Passed through to [sird_ga_loglik()] / the simulator.
+#' @param method `"gillespie"` or `"residual"`.
+#' @param B Number of bootstrap replicates.
+#' @param level Confidence level.
+#' @param S0,I0,R0 Initial head counts, required for `method = "gillespie"`
+#'   (derived from `fit$theta` and `N` if omitted).
+#' @return A list with `boot_theta` (`B x p` matrix of bootstrap estimates)
+#'   and `ci` (matrix of percentile confidence limits, one row per
+#'   parameter).
+#' @export
+sird_ga_bootstrap <- function(fit, y, N, Delta = 1,
+                               method = c("gillespie", "residual"),
+                               B = 200L, level = 0.95,
+                               S0 = NULL, I0 = NULL, R0 = NULL) {
+  method <- match.arg(method)
+  theta <- fit$theta
+  settings <- fit$settings
+
+  refit_one <- function(y_rep, start) {
+    tryCatch({
+      f <- sird_ga_fit(y_rep, N = N, Delta = Delta, start = start,
+                        n_sub = settings$n_sub, Q0_diag = settings$Q0_diag,
+                        hessian = FALSE)
+      f$theta
+    }, error = function(e) rep(NA_real_, length(theta)))
+  }
+
+  boot_theta <- matrix(NA_real_, B, length(theta))
+  colnames(boot_theta) <- names(theta)
+
+  if (method == "gillespie") {
+    if (is.null(S0)) S0 <- round(N * theta[["s0"]])
+    if (is.null(I0)) I0 <- round(N * theta[["i0"]])
+    if (is.null(R0)) R0 <- round(N * theta[["r0"]])
+    Tmax <- (length(y) - 1L) * Delta
+    for (b in seq_len(B)) {
+      sim <- sird_ga_simulate_obs(N, S0, I0, R0,
+                                   theta[["lambda"]], theta[["gamma"]], theta[["alpha"]],
+                                   theta[["p"]], theta[["tau2"]], Tmax, Delta)
+      boot_theta[b, ] <- refit_one(sim$y, as.list(theta))
+    }
+  } else {
+    kf <- sird_ga_loglik(theta, y, N, Delta, settings$n_sub, settings$Q0_diag,
+                          keep_states = TRUE)
+    M <- theta[["p"]] * kf$predicted[, "i"]
+    resid <- y - M
+    resid_c <- resid - mean(resid)
+    for (b in seq_len(B)) {
+      y_rep <- pmax(M + sample(resid_c, length(resid_c), replace = TRUE), 0)
+      boot_theta[b, ] <- refit_one(y_rep, as.list(theta))
+    }
+  }
+
+  alpha2 <- (1 - level) / 2
+  ci <- t(apply(boot_theta, 2, stats::quantile,
+                probs = c(alpha2, 1 - alpha2), na.rm = TRUE))
+  colnames(ci) <- c("lower", "upper")
+  list(boot_theta = boot_theta, ci = ci, method = method, B = B, level = level)
+}

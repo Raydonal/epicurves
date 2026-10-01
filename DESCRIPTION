@@ -1,0 +1,43 @@
+Package: epicurves
+Title: Gaussian-Approximated SIRD Inference and Piecewise Ensemble Growth Models for Epidemic Curves
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Raydonal", "Ospina", , "raydonal@castlab.org", role = c("aut", "cre")),
+    person("Jaciele", "Oliveira", , "jaciele.jesus@ufpe.br", role = "aut"),
+    person("Cristiano", "Ferraz", , "cferraz@castlab.org", role = "aut")
+    )
+Description: Reference implementation accompanying two companion manuscripts
+    derived from Oliveira's doctoral thesis on COVID-19 epidemic curve
+    modelling. SIRD-GA is a stochastic SIRD model estimated via a
+    Gaussian-diffusion approximation of the underlying density-dependent
+    Markov jump process, with maximum-likelihood estimation through a
+    Kalman filter under partial observation and under-reporting. The
+    piecewise ensemble module combines Logistic, Gompertz and Richards
+    growth curves with weights based on mean squared error or AIC, and
+    identifies structural change points ("partition points") in epidemic
+    growth via sequential grid search. The package reproduces every
+    simulation study, table and figure reported in the two manuscripts.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+URL: https://github.com/Raydonal/epicurves
+BugReports: https://github.com/Raydonal/epicurves/issues
+Depends:
+    R (>= 4.1)
+Imports:
+    deSolve,
+    minpack.lm,
+    stats
+Suggests:
+    ggplot2,
+    dplyr,
+    tidyr,
+    patchwork,
+    scales,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    pkgdown
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
