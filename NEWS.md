@@ -1,5 +1,16 @@
 # epicurves 0.0.0.9000
 
+## Ill-conditioned innovation covariance no longer aborts incidence fits
+
+The C++ Kalman log-likelihood (`src/sird_ga_fast.cpp`) called
+`arma::inv_sympd()` on the innovation covariance after only a determinant
+check. When that matrix passed the check but was ill-conditioned, the call
+threw and aborted the surrounding `optim()`, killing whole fits (first seen
+in the reporting-probability profile of the time-varying Paraíba fit at
+`p = 0.03`). The non-throwing overload is now used and the evaluation
+returns the `-Inf` log-likelihood sentinel, so optimizers penalize that
+point and continue. Fits that never hit the exception are unchanged.
+
 ## Independent verification of Article 1's inherited simulation tables
 
 The Article 1 Scenario 1-5 SIRD-GA/SIR tables were transcribed from the

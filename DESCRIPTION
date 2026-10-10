@@ -26,6 +26,7 @@ Depends:
     R (>= 4.1)
 Imports:
     deSolve,
+    Rcpp,
     ggplot2,
     minpack.lm,
     stats
@@ -37,8 +38,12 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
+    edetect,
     pkgdown
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
 LazyData: true
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
