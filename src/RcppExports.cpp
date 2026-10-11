@@ -11,6 +11,51 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// ga_transition_cpp
+List ga_transition_cpp(int n, double Delta, NumericVector x0, NumericMatrix theta, NumericMatrix V, IntegerVector pidx, IntegerVector r1, IntegerVector r2, int nsub);
+RcppExport SEXP _epicurves_ga_transition_cpp(SEXP nSEXP, SEXP DeltaSEXP, SEXP x0SEXP, SEXP thetaSEXP, SEXP VSEXP, SEXP pidxSEXP, SEXP r1SEXP, SEXP r2SEXP, SEXP nsubSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type Delta(DeltaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type V(VSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type pidx(pidxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type r1(r1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type r2(r2SEXP);
+    Rcpp::traits::input_parameter< int >::type nsub(nsubSEXP);
+    rcpp_result_gen = Rcpp::wrap(ga_transition_cpp(n, Delta, x0, theta, V, pidx, r1, r2, nsub));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ga_loglik_cpp
+List ga_loglik_cpp(NumericMatrix Y, double N, double Delta, NumericVector x0, NumericMatrix theta, NumericMatrix V, IntegerVector pidx, IntegerVector r1, IntegerVector r2, IntegerVector obs_type, IntegerVector obs_index, NumericVector obs_p, NumericVector obs_tau2, int nsub, double Q0, double var_floor);
+RcppExport SEXP _epicurves_ga_loglik_cpp(SEXP YSEXP, SEXP NSEXP, SEXP DeltaSEXP, SEXP x0SEXP, SEXP thetaSEXP, SEXP VSEXP, SEXP pidxSEXP, SEXP r1SEXP, SEXP r2SEXP, SEXP obs_typeSEXP, SEXP obs_indexSEXP, SEXP obs_pSEXP, SEXP obs_tau2SEXP, SEXP nsubSEXP, SEXP Q0SEXP, SEXP var_floorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< double >::type N(NSEXP);
+    Rcpp::traits::input_parameter< double >::type Delta(DeltaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x0(x0SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type V(VSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type pidx(pidxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type r1(r1SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type r2(r2SEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type obs_type(obs_typeSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type obs_index(obs_indexSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type obs_p(obs_pSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type obs_tau2(obs_tau2SEXP);
+    Rcpp::traits::input_parameter< int >::type nsub(nsubSEXP);
+    Rcpp::traits::input_parameter< double >::type Q0(Q0SEXP);
+    Rcpp::traits::input_parameter< double >::type var_floor(var_floorSEXP);
+    rcpp_result_gen = Rcpp::wrap(ga_loglik_cpp(Y, N, Delta, x0, theta, V, pidx, r1, r2, obs_type, obs_index, obs_p, obs_tau2, nsub, Q0, var_floor));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sird_ga_transition_cpp
 List sird_ga_transition_cpp(int n, double Delta, NumericVector x0, double lambda, double gamma, double alpha, int nsub);
 RcppExport SEXP _epicurves_sird_ga_transition_cpp(SEXP nSEXP, SEXP DeltaSEXP, SEXP x0SEXP, SEXP lambdaSEXP, SEXP gammaSEXP, SEXP alphaSEXP, SEXP nsubSEXP) {
@@ -78,6 +123,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_epicurves_ga_transition_cpp", (DL_FUNC) &_epicurves_ga_transition_cpp, 9},
+    {"_epicurves_ga_loglik_cpp", (DL_FUNC) &_epicurves_ga_loglik_cpp, 16},
     {"_epicurves_sird_ga_transition_cpp", (DL_FUNC) &_epicurves_sird_ga_transition_cpp, 7},
     {"_epicurves_sird_ga_loglik_prev_cpp", (DL_FUNC) &_epicurves_sird_ga_loglik_prev_cpp, 11},
     {"_epicurves_sird_ga_loglik_inc_cpp", (DL_FUNC) &_epicurves_sird_ga_loglik_inc_cpp, 17},

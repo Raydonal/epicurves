@@ -1,5 +1,25 @@
 # epicurves 0.0.0.9000
 
+## Generic compartmental engine rewritten (`ga_model()` and friends)
+
+`ga_model()`, `ga_event()`, `ga_incidence()`, `ga_prevalence()`,
+`ga_loglik()`, `ga_simulate()`, `ga_fit()` and `ga_profile()` replace the
+earlier closure-based engine (`new_jump_model()`, `general_ga_*()`,
+`seird_model()`, `sird_model()`), which is removed. The new engine
+(`src/ga_generic.cpp`) handles any mass-action model with all compartments
+explicit, integrates the mean, the resolvent and the Lyapunov equation of the
+state-noise covariance jointly by RK4 (the old engine obtained `Q_k` by
+Simpson quadrature on the stored ODE grid, with relative errors of 0.3% to
+3% for 10 to 80 Simpson substeps against 1.5e-8 to 3.6e-6 for 20 to 5 RK4 steps in
+`Articles/Article1_SIRD-GA/analysis/check_Qk.R`), observes event incidence
+through cumulative event counters in an augmented state, and allows
+piecewise-constant rate parameters. On SIRD with daily cases and deaths it
+reproduces `sird_ga_loglik_inc()` to within 2e-10 in the log-likelihood,
+for constant and time-varying transmission (`test-ga-generic.R`).
+`ga_fit()` uses a Nelder-Mead search with relative tolerance 1e-8 followed by
+BFGS; on a SEIRD example this reached the same maximum as two long
+Nelder-Mead runs with about one fifth of the likelihood evaluations.
+
 ## Ill-conditioned innovation covariance no longer aborts incidence fits
 
 The C++ Kalman log-likelihood (`src/sird_ga_fast.cpp`) called

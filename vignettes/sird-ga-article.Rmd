@@ -1,125 +1,100 @@
 ---
-title: "Reproducing Article 1: the SIRD-GA model"
+title: "SIRD-GA from daily cases and deaths"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Reproducing Article 1: the SIRD-GA model}
+  %\VignetteIndexEntry{SIRD-GA from daily cases and deaths}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4)
 ```
 
 ```{r setup}
 library(epicurves)
+```
+
+This vignette shows the functions behind the article on what reported cases
+and deaths can identify in a stochastic SIRD model (Ospina, Oliveira, Ferraz
+and Gondim). The heavier computations of the article are shown but not run.
+
+## Simulated cases and deaths
+
+`sird_ga_simulate_inc()` simulates the SIRD jump process exactly and turns
+its daily increments into reported cases (binomial thinning with probability
+`p` plus measurement error with variance `tau2` times the latent count) and
+reported deaths (probability `q`, variance scale `tau2_d`).
+
+```{r simulate}
 set.seed(1)
-```
-
-This vignette reproduces the simulation study and real-data application of
-Article 1 (the SIRD-GA model) using only exported functions of this
-package.
-
-## Basic reproduction number and ODE mass balance
-
-```{r r0}
-sird_R0(lambda = 0.4, gamma = 0.15, alpha = 0.08)
-out <- sird_ode_solve(times = 0:200, x0 = c(s = 0.999, i = 0.001, r = 0),
-                       parms = list(lambda = 0.4, gamma = 0.15, alpha = 0.08))
-range(out$s + out$i + out$r + out$d) # should be 1 throughout
-```
-
-## Simulation study
-
-```{r sim}
 N <- 20000
-theta_true <- c(lambda = 0.4, gamma = 0.15, alpha = 0.08, s0 = 0.999, i0 = 0.001,
-                 r0 = 0, p = 0.6, tau2 = 0.2)
-sim <- sird_ga_simulate_obs(N, S0 = round(N * 0.999), I0 = round(N * 0.001), R0 = 0,
-                             lambda = theta_true[["lambda"]], gamma = theta_true[["gamma"]],
-                             alpha = theta_true[["alpha"]], p = theta_true[["p"]],
-                             tau2 = theta_true[["tau2"]], Tmax = 100, Delta = 1)
-
-fit <- sird_ga_fit(sim$y, N, Delta = 1,
-                    start = list(lambda = 0.3, gamma = 0.1, alpha = 0.1, i0 = 0.002,
-                                 p = 0.5, tau2 = 0.3),
-                    n_sub = 6, hessian = FALSE, control = list(maxit = 1000, reltol = 1e-9))
-round(fit$theta, 4)
-sird_R0(fit$theta[["lambda"]], fit$theta[["gamma"]], fit$theta[["alpha"]])
+si <- sird_ga_simulate_inc(N, S0 = N - 10, I0 = 10, R0 = 0, lambda = 0.6, gamma = 0.3,
+                           alpha = 0.1, p = 0.5, tau2 = 0.16, q = 1, tau2_d = 0.1, Tmax = 100)
+c(cases = sum(si$cases), deaths = sum(si$deaths))
 ```
 
-Transmission rate and $R_0$ recover well; the recovery/mortality split
-($\gamma$ vs. $\alpha$) is only partially identified from infection-only
-data, consistent with the thesis's own appendix simulation (Scenarios 4-5),
-where the sum $\gamma+\alpha$ is recovered far more precisely than either
-rate individually.
+## Fitting to cases and deaths
 
-## Real-data application: COVID-19 first wave, Paraíba, Brazil
+`sird_ga_fit_inc()` maximises the Kalman-filter log-likelihood of the
+Gaussian approximation, with the death reporting probability held at
+`q = 1` (the product of `q` and the death rate is what the death counts
+identify).
 
-```{r real-data}
+```{r fit}
+fit <- sird_ga_fit_inc(si$cases, si$deaths, N, use = "both",
+                       starts = list(list(lambda = 0.5, gamma = 0.25, alpha = 0.15, i0 = 5e-4,
+                                          p = 0.6, tau2 = 0.3, tau2_d = 0.3)),
+                       nsub = 5L)
+round(fit$theta[c("lambda", "gamma", "alpha", "p")], 3)
+fit$loglik
+```
+
+## The death rate is not identifiable from cases alone
+
+With cases only, recovery and death enter the likelihood through
+`gamma + alpha`. The profile log-likelihood of `alpha` is flat when fitted to
+cases and has a maximum when deaths are added:
+
+```{r profile, eval = FALSE}
+fit_c <- sird_ga_fit_inc(si$cases, NULL, N, use = "cases",
+                         starts = list(list(lambda = 0.5, gamma = 0.25, alpha = 0.15,
+                                            i0 = 5e-4, p = 0.6, tau2 = 0.3)),
+                         free = c("lambda", "gamma", "alpha", "i0", "p", "tau2"))
+grid <- c(0.01, 0.05, 0.1, 0.2, 0.3)
+sird_ga_profile(fit_c, si$cases, NULL, "alpha", grid)
+sird_ga_profile(fit, si$cases, si$deaths, "alpha", grid)
+```
+
+## Paraíba: weekly data and transmission changing every four weeks
+
+The application aggregates the daily counts of 2020 into complete
+epidemiological weeks (daily counts carry a strong weekly reporting cycle) and
+lets the transmission rate change every four weeks with
+`sird_ga_fit_tv()`. Rates are then per week.
+
+```{r paraiba}
 data(paraiba_covid19)
 data(paraiba_population)
-y_raw <- paraiba_covid19$new_cases
-y_smooth <- smooth_series(y_raw, 7)
+d <- paraiba_covid19
+wk <- d$epi_week
+keep <- wk %in% names(which(table(wk) == 7))
+cases <- as.numeric(tapply(d$new_cases[keep], wk[keep], sum))
+deaths <- as.numeric(tapply(d$new_deaths[keep], wk[keep], sum))
+blk <- ceiling(seq_along(cases) / 4)
+c(weeks = length(cases), blocks = max(blk))
 ```
 
-Raw daily case counts carry pronounced day-of-week reporting artefacts
-(lower weekend counts, Monday catch-up spikes) that materially affect the
-Kalman-filter likelihood surface; `smooth_series()` applies a 7-day
-centered moving average before estimation, as recommended for this
-application.
-
-```{r real-fit, eval = FALSE}
-# Each start takes 2-5 minutes; not run automatically when building the
-# vignette. See the summary table and discussion below for the results.
-ms_real <- sird_ga_fit_multistart(
-  y_smooth, paraiba_population, Delta = 1, r0_guess = 1.1,
-  infectious_period_days = c(3, 4, 5, 7, 10),
-  n_sub = 6, p_max = 0.98, control = list(maxit = 800, reltol = 1e-8)
-)
-ms_real$summary
-
-fit_real <- ms_real$best
-
-kf_real <- sird_ga_loglik(fit_real$theta, y_smooth, paraiba_population, Delta = 1,
-                           n_sub = 6, keep_states = TRUE)
-plot_sird_ga_fit(y_smooth, kf_real)
+```{r paraiba-fit, eval = FALSE}
+rem <- 7 / 7  # removal rate per week for a mean infectious period of 7 days
+st <- list(lambda = rep(1.2 * rem, max(blk)), gamma = 0.98 * rem, alpha = 0.02 * rem,
+           i0 = 5e-6, p = 0.2, tau2 = 20, tau2_d = 2)
+f <- sird_ga_fit_tv(cases, deaths, paraiba_population, blk, "both", st, nsub = 20L)
+7 / (f$theta[["gamma"]] + f$theta[["alpha"]])   # mean infectious period, days
+tapply(f$R_t, blk, mean)                         # reproduction number by block
 ```
 
-## A practical-identifiability finding: two basins, not one
-
-Running `sird_ga_fit_multistart()` from five starting infectious periods
-(3, 4, 5, 7 and 10 days) on the smoothed series produces:
-
-| start (days) | loglik | $R_0$ | $\lambda$ | $\gamma$ | $\alpha$ | $\gamma+\alpha$ |
-|---|---|---|---|---|---|---|
-| 3  | 2947.3 | 1.027 | 0.736 | 0.541 | 0.175 | 0.716 |
-| 4  | 2947.3 | 1.027 | 0.737 | 0.517 | 0.200 | 0.717 |
-| 5  | 2947.3 | 1.027 | 0.736 | 0.683 | 0.033 | 0.716 |
-| 7  | 2947.3 | 1.027 | 0.736 | 0.716 | 0.000 | 0.716 |
-| 10 | 2924.0 | 1.034 | 0.229 | 0.093 | 0.128 | 0.221 |
-
-Two distinct optima emerge, not a single flat ridge. Four of five starts
-converge to a **fast-dynamics** basin: a stable optimum with
-$R_0\approx1.03$ in which $\gamma$ and $\alpha$ individually vary freely
-(0.00-0.70) while their sum stays pinned at $\gamma+\alpha\approx0.72$
-(mean infectious period $\approx1.4$ days) — every split along this ridge
-attains the *same* log-likelihood to one decimal place. The fifth start
-converges to a **slow-dynamics** optimum, log-likelihood only $\approx$23
-nats lower, with $\gamma+\alpha\approx0.22$ (mean infectious period
-$\approx4.5$ days) — closely matching the published
-$\lambda=0.26,\gamma+\alpha=0.25$ and consistent with established COVID-19
-natural-history estimates, whereas the fast basin's 1.4-day infectious
-period is not.
-
-This is a textbook case for combining the raw likelihood with
-epidemiological prior knowledge rather than reporting the unconstrained
-MLE alone: the data mildly prefer the fast-dynamics basin, but its implied
-infectious period is biologically implausible, while the slightly-worse
-slow-dynamics basin is the epidemiologically defensible choice. Both the
-$\gamma$/$\alpha$ ridge and the two-basin structure are consistent with,
-and extend, the thesis's own appendix finding that $\gamma$ and $\alpha$
-are estimated far less precisely than $\lambda$ or $R_0$ in simulation.
-We recommend `sird_ga_fit_multistart()` as standard practice for any
-SIR/SIRD Kalman-filter application to real incidence data, and report both
-basins transparently in Article 1 rather than a single point estimate.
+The same model can be written with the general engine
+(`vignette("compartmental-models")`): `ga_model()` with infection, recovery and
+death events, `ga_incidence()` streams for infection and death, and
+`blocks = list(lambda = blk)` in `ga_fit()`.

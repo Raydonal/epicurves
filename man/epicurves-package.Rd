@@ -4,11 +4,11 @@
 \name{epicurves-package}
 \alias{epicurves}
 \alias{epicurves-package}
-\title{epicurves: Gaussian-Approximated SIRD Inference and Piecewise Ensemble Growth Models for Epidemic Curves}
+\title{epicurves: Likelihood Inference for Epidemic Curves with Stochastic Compartmental Models and Growth-Curve Ensembles}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Reference implementation accompanying two companion manuscripts derived from Oliveira's doctoral thesis on COVID-19 epidemic curve modelling. SIRD-GA is a stochastic SIRD model estimated via a Gaussian-diffusion approximation of the underlying density-dependent Markov jump process, with maximum-likelihood estimation through a Kalman filter under partial observation and under-reporting. The piecewise ensemble module combines Logistic, Gompertz and Richards growth curves with weights based on mean squared error or AIC, and identifies structural change points ("partition points") in epidemic growth via sequential grid search. The package reproduces every simulation study, table and figure reported in the two manuscripts.
+Likelihood-based tools for epidemic curves. Stochastic compartmental models are fitted to surveillance counts through the Gaussian (linear noise) approximation of the underlying density-dependent Markov jump process and a Kalman filter: any mass-action model can be declared by its events, observed through the incidence of events (new cases, new deaths) or the prevalence of compartments, with under-reporting and time-varying rates. Logistic, Gompertz and Richards growth curves are fitted to daily counts by Poisson or negative binomial likelihood, combined with Akaike weights, and the series is divided into phases by penalised likelihood or by anytime-valid sequential e-detectors. The package accompanies two articles derived from Oliveira's doctoral thesis and reproduces their analyses.
 }
 \seealso{
 Useful links:
@@ -26,6 +26,7 @@ Authors:
   \item Raydonal Ospina \email{raydonal@castlab.org}
   \item Jaciele Oliveira \email{jaciele.jesus@ufpe.br}
   \item Cristiano Ferraz \email{cferraz@castlab.org}
+  \item André Leite
 }
 
 }

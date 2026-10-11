@@ -14,14 +14,39 @@ navbar:
     right: [search, github]
 
 articles:
-  - title: Article reproductions
+  - title: Articles
     navbar: Articles
     contents:
+      - compartmental-models
       - sird-ga-article
       - piecewise-ensemble-article
 
 reference:
-  - title: "SIRD-GA: dynamics and simulation"
+  - title: "Compartmental models under the Gaussian approximation"
+    desc: >
+      Any mass-action compartmental model, incidence or prevalence
+      observations, time-varying rates.
+    contents:
+      - ga_model
+      - ga_event
+      - ga_incidence
+      - ga_prevalence
+      - ga_loglik
+      - ga_simulate
+      - ga_fit
+      - ga_profile
+      - confint.ga_fit
+      - predict.ga_fit
+      - plot.ga_fit
+  - title: "SIRD-GA from daily cases and deaths"
+    contents:
+      - sird_ga_simulate_inc
+      - sird_ga_loglik_inc
+      - sird_ga_fit_inc
+      - sird_ga_fit_tv
+      - sird_ga_profile
+      - sird_ga_loglik_prev
+  - title: "SIRD-GA: dynamics, simulation and the prevalence model"
     contents:
       - sird_drift
       - sird_jacobian
@@ -31,8 +56,6 @@ reference:
       - sird_ode_solve
       - sird_gillespie
       - sird_ga_simulate_obs
-  - title: "SIRD-GA: estimation and inference"
-    contents:
       - sird_ga_transition
       - sird_ga_Ak
       - sird_ga_Fk
@@ -41,37 +64,34 @@ reference:
       - sird_ga_fit
       - sird_ga_fit_multistart
       - sird_ga_bootstrap
-  - title: "General compartmental engine (SEIRD-GA and other extensions)"
-    contents:
-      - new_jump_model
-      - jm_drift
-      - jm_diffusion
-      - jm_jacobian
-      - sird_model
-      - seird_model
-      - general_gillespie
-      - general_ga_simulate_obs
-      - general_ga_transition
-      - general_ga_loglik
-      - general_ga_fit
-  - title: "Growth-curve models"
+  - title: "Growth curves on daily counts"
     contents:
       - logistic_curve
       - gompertz_curve
       - richards_curve
-      - fit_growth_model
-  - title: "Ensemble and piecewise ensemble"
+      - growth_incidence
+      - fit_growth_incidence
+      - fit_ensemble_incidence
+      - predict_band
+  - title: "Segmentation of epidemic curves"
     contents:
+      - bic_segment
+      - edetect_segment
+  - title: "Ensembles on cumulative counts (earlier approach)"
+    contents:
+      - fit_growth_model
       - ensemble_weights
       - fit_ensemble
       - predict.ensemble_fit
       - ensemble_bootstrap_ci
+      - ensemble_bootstrap_params
       - split_mse
       - split_mse_single
       - find_partition_point
       - permutation_test_partition
       - fit_piecewise_ensemble
       - predict.piecewise_fit
+      - smooth_series
   - title: "Plotting"
     contents:
       - starts_with("plot_")
@@ -79,6 +99,3 @@ reference:
     contents:
       - paraiba_covid19
       - paraiba_population
-  - title: "Utilities"
-    contents:
-      - smooth_series

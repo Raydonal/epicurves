@@ -1,0 +1,121 @@
+---
+title: "Compartmental models from surveillance counts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compartmental models from surveillance counts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 3)
+```
+
+```{r setup}
+library(epicurves)
+```
+
+This vignette shows how to declare a stochastic compartmental model, simulate
+surveillance counts from it and fit it by maximum likelihood under the
+Gaussian (linear noise) approximation of the Markov jump process.
+
+## Declaring a model
+
+A model is a set of compartments and a named list of events. Each event moves
+one individual from `from` to `to` at rate `rate * x[from] * x[by]` (fractions
+of the population), or `rate * x[from]` when `by` is omitted.
+
+```{r model}
+sird <- ga_model(c("S", "I", "R", "D"), list(
+  infection = ga_event("S", "I", rate = "lambda", by = "I"),
+  recovery  = ga_event("I", "R", rate = "gamma"),
+  death     = ga_event("I", "D", rate = "alpha")))
+sird
+```
+
+## Observations
+
+Surveillance counts are increments: new cases and new deaths in each
+interval. `ga_incidence()` counts the firings of an event; `ga_prevalence()`
+counts the members of a compartment at the end of each interval. Reported
+counts are a binomial thinning of the latent counts, with probability `prob`,
+plus measurement error with variance `noise` times the latent count. Either
+argument can be a parameter name or a fixed number.
+
+```{r obs}
+obs <- list(cases  = ga_incidence("infection", prob = "p", noise = "tau2"),
+            deaths = ga_incidence("death", prob = 1, noise = "tau2_d"))
+```
+
+## Simulating and fitting
+
+```{r simulate}
+truth <- list(lambda = 0.6, gamma = 0.3, alpha = 0.1, p = 0.5, tau2 = 0.2, tau2_d = 0.1)
+set.seed(1)
+sim <- ga_simulate(sird, truth, c(S = 19990, I = 10, R = 0, D = 0), obs, n = 80)
+colSums(sim$data)
+```
+
+The initial state is given as a function of the parameters, so that the
+initial fraction of infectious individuals can be estimated:
+
+```{r fit}
+init <- function(p) c(S = 1 - p$i0, I = p$i0, R = 0, D = 0)
+fit <- ga_fit(sird, sim$data, obs, N = 20000, init = init,
+              start = list(lambda = 0.5, gamma = 0.25, alpha = 0.15, i0 = 1e-3,
+                           p = 0.6, tau2 = 0.3, tau2_d = 0.3))
+fit
+plot(fit, labels = c("Reported cases", "Reported deaths"))
+```
+
+`confint()` returns Wald intervals computed on the scale of the optimisation
+(logarithms, or logits for probabilities and initial fractions) and
+transformed back. `predict()` returns the one-step-ahead predicted means and
+standard deviations of the counts.
+
+## Rates that change over time
+
+A rate parameter listed in `blocks` takes one value per block of
+observation intervals. For two transmission rates of 40 days each:
+
+```{r blocks, eval = FALSE}
+fit_tv <- ga_fit(sird, sim$data, obs, N = 20000, init = init,
+                 start = list(lambda = c(0.5, 0.5), gamma = 0.25, alpha = 0.15, i0 = 1e-3,
+                              p = 0.6, tau2 = 0.3, tau2_d = 0.3),
+                 blocks = list(lambda = rep(1:2, each = 40)))
+```
+
+## What the data identify
+
+With cases only, the recovery and death rates enter the likelihood only
+through their sum, so the death rate is not identifiable. A profile
+likelihood shows this directly (not run here because each grid point is a
+complete fit):
+
+```{r profile, eval = FALSE}
+cases_only <- sim$data
+cases_only[, 2] <- NA
+fit_c <- ga_fit(sird, cases_only, obs, 20000, init,
+                start = list(lambda = 0.5, gamma = 0.25, alpha = 0.15, i0 = 1e-3,
+                             p = 0.6, tau2 = 0.3), fixed = list(tau2_d = 0.1))
+ga_profile(fit_c, "alpha", grid = c(0.1, 0.05, 0.02, 0.15, 0.2))
+```
+
+## Other models
+
+Any mass-action structure can be declared in the same way, for example a
+SEIRD model with a latent compartment, or a SIRDV model with vaccination
+observed through the number of doses:
+
+```{r others}
+seird <- ga_model(c("S", "E", "I", "R", "D"), list(
+  infection   = ga_event("S", "E", "lambda", by = "I"),
+  progression = ga_event("E", "I", "sigma"),
+  recovery    = ga_event("I", "R", "gamma"),
+  death       = ga_event("I", "D", "alpha")))
+sirdv <- ga_model(c("S", "I", "R", "D", "V"), list(
+  infection   = ga_event("S", "I", "lambda", by = "I"),
+  recovery    = ga_event("I", "R", "gamma"),
+  death       = ga_event("I", "D", "alpha"),
+  vaccination = ga_event("S", "V", "nu")))
+```

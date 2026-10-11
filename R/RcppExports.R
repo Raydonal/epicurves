@@ -2,6 +2,16 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @noRd
+ga_transition_cpp <- function(n, Delta, x0, theta, V, pidx, r1, r2, nsub = 10L) {
+    .Call(`_epicurves_ga_transition_cpp`, n, Delta, x0, theta, V, pidx, r1, r2, nsub)
+}
+
+#' @noRd
+ga_loglik_cpp <- function(Y, N, Delta, x0, theta, V, pidx, r1, r2, obs_type, obs_index, obs_p, obs_tau2, nsub = 10L, Q0 = 1e-10, var_floor = 1e-3) {
+    .Call(`_epicurves_ga_loglik_cpp`, Y, N, Delta, x0, theta, V, pidx, r1, r2, obs_type, obs_index, obs_p, obs_tau2, nsub, Q0, var_floor)
+}
+
+#' @noRd
 sird_ga_transition_cpp <- function(n, Delta, x0, lambda, gamma, alpha, nsub = 10L) {
     .Call(`_epicurves_sird_ga_transition_cpp`, n, Delta, x0, lambda, gamma, alpha, nsub)
 }
