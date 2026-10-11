@@ -67,5 +67,8 @@ export(smooth_series)
 export(split_mse)
 importFrom(Rcpp,sourceCpp)
 importFrom(ggplot2,.data)
-importFrom(stats,predict)
+importFrom(stats,
+  confint,
+  predict
+)
 useDynLib(epicurves, .registration = TRUE)
