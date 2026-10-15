@@ -1,0 +1,296 @@
+# epicurves
+
+Likelihood inference for epidemic curves. The package accompanies two
+manuscripts in preparation derived from Jaciele Oliveira’s doctoral
+thesis (Programa de Pós-Graduação em Estatística, UFPE) and reproduces
+their analyses.
+
+- **Stochastic compartmental models under the Gaussian approximation.**
+  Any mass-action model is declared by its events
+  ([`ga_model()`](https://raydonal.github.io/epicurves/reference/ga_model.md),
+  [`ga_event()`](https://raydonal.github.io/epicurves/reference/ga_event.md)),
+  observed through the incidence of events or the prevalence of
+  compartments, with under-reporting and time-varying rates, and fitted
+  by maximum likelihood with a Kalman filter
+  ([`ga_fit()`](https://raydonal.github.io/epicurves/reference/ga_fit.md),
+  [`ga_profile()`](https://raydonal.github.io/epicurves/reference/ga_profile.md),
+  [`ga_bootstrap()`](https://raydonal.github.io/epicurves/reference/ga_bootstrap.md)).
+  The SIRD model fitted to daily cases and deaths has a dedicated
+  interface
+  ([`sird_ga_fit_inc()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit_inc.md),
+  [`sird_ga_fit_tv()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit_tv.md)).
+- **Growth-curve ensembles on daily counts.** Logistic, Gompertz and
+  Richards curves are fitted by Poisson or negative binomial likelihood
+  and combined with Akaike weights
+  ([`fit_ensemble_incidence()`](https://raydonal.github.io/epicurves/reference/fit_ensemble_incidence.md));
+  a series is divided into phases by penalised likelihood
+  ([`bic_segment()`](https://raydonal.github.io/epicurves/reference/bic_segment.md))
+  or by anytime-valid sequential e-detectors
+  ([`edetect_segment()`](https://raydonal.github.io/epicurves/reference/edetect_segment.md)).
+
+The `paraiba_covid19` dataset holds the COVID-19 surveillance series for
+Paraíba, Brazil, used in both applications.
+
+## Installation
+
+``` r
+# install.packages("remotes")
+remotes::install_github("Raydonal/epicurves")
+
+# optional, needed by edetect_segment():
+remotes::install_github("castlaboratory/edetect")
+```
+
+## Example
+
+Declare a SIRD model, simulate reported cases and deaths, and fit it:
+
+``` r
+library(epicurves)
+
+sird <- ga_model(c("S", "I", "R", "D"), list(
+  infection = ga_event("S", "I", rate = "lambda", by = "I"),
+  recovery  = ga_event("I", "R", rate = "gamma"),
+  death     = ga_event("I", "D", rate = "alpha")))
+obs <- list(cases  = ga_incidence("infection", prob = "p", noise = "tau2"),
+            deaths = ga_incidence("death", prob = 1, noise = "tau2_d"))
+
+truth <- list(lambda = 0.6, gamma = 0.3, alpha = 0.1, p = 0.5, tau2 = 0.2, tau2_d = 0.1)
+set.seed(1)
+sim <- ga_simulate(sird, truth, c(S = 19990, I = 10, R = 0, D = 0), obs, n = 80)
+
+init <- function(p) c(S = 1 - p$i0, I = p$i0, R = 0, D = 0)
+fit <- ga_fit(sird, sim$data, obs, N = 20000, init = init,
+              start = list(lambda = 0.5, gamma = 0.25, alpha = 0.15, i0 = 1e-3,
+                           p = 0.6, tau2 = 0.3, tau2_d = 0.3))
+confint(fit)
+```
+
+Divide the daily deaths in Paraíba into phases:
+
+``` r
+data(paraiba_covid19)
+seg <- bic_segment(paraiba_covid19$new_deaths, d_min = 12, family = "negbin", step = 5)
+paraiba_covid19$date[seg$cuts]
+```
+
+The articles on the package website work through both methods in detail.
+`NEWS.md` records the findings made while validating the package against
+the thesis.
+
+# Package index
+
+## Compartmental models under the Gaussian approximation
+
+Any mass-action compartmental model, incidence or prevalence
+observations, time-varying rates.
+
+- [`ga_model()`](https://raydonal.github.io/epicurves/reference/ga_model.md)
+  : Define a mass-action compartmental model
+
+- [`ga_event()`](https://raydonal.github.io/epicurves/reference/ga_event.md)
+  : Define an event of a mass-action compartmental model
+
+- [`ga_incidence()`](https://raydonal.github.io/epicurves/reference/ga_incidence.md)
+  [`ga_prevalence()`](https://raydonal.github.io/epicurves/reference/ga_incidence.md)
+  : Observation streams for the Gaussian-approximation likelihood
+
+- [`ga_loglik()`](https://raydonal.github.io/epicurves/reference/ga_loglik.md)
+  : Gaussian-approximation log-likelihood of a compartmental model
+
+- [`ga_simulate()`](https://raydonal.github.io/epicurves/reference/ga_simulate.md)
+  : Exact simulation of a compartmental model and its surveillance
+  counts
+
+- [`ga_fit()`](https://raydonal.github.io/epicurves/reference/ga_fit.md)
+  : Maximum likelihood for a compartmental model under the Gaussian
+  approximation
+
+- [`ga_profile()`](https://raydonal.github.io/epicurves/reference/ga_profile.md)
+  :
+
+  Profile log-likelihood for one parameter of a `ga_fit`
+
+- [`ga_bootstrap()`](https://raydonal.github.io/epicurves/reference/ga_bootstrap.md)
+  :
+
+  Parametric bootstrap for a `ga_fit`
+
+- [`confint(`*`<ga_fit>`*`)`](https://raydonal.github.io/epicurves/reference/confint.ga_fit.md)
+  :
+
+  Wald confidence intervals for a `ga_fit`
+
+- [`confint(`*`<ga_boot>`*`)`](https://raydonal.github.io/epicurves/reference/confint.ga_boot.md)
+  :
+
+  Bootstrap confidence intervals for a `ga_boot`
+
+- [`predict(`*`<ga_fit>`*`)`](https://raydonal.github.io/epicurves/reference/predict.ga_fit.md)
+  :
+
+  One-step-ahead predictions from a `ga_fit`
+
+- [`plot(`*`<ga_fit>`*`)`](https://raydonal.github.io/epicurves/reference/plot.ga_fit.md)
+  :
+
+  Plot the one-step-ahead predictions of a `ga_fit`
+
+## SIRD-GA from daily cases and deaths
+
+- [`sird_ga_simulate_inc()`](https://raydonal.github.io/epicurves/reference/sird_ga_simulate_inc.md)
+  : Simulate daily reported cases and deaths from the SIRD jump process
+- [`sird_ga_loglik_inc()`](https://raydonal.github.io/epicurves/reference/sird_ga_loglik_inc.md)
+  : SIRD-GA log-likelihood for daily reported cases and/or deaths
+- [`sird_ga_fit_inc()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit_inc.md)
+  : Maximum likelihood for SIRD-GA from daily cases and/or deaths
+- [`sird_ga_fit_tv()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit_tv.md)
+  : SIRD-GA with piecewise-constant transmission, fitted to cases and
+  deaths
+- [`sird_ga_profile()`](https://raydonal.github.io/epicurves/reference/sird_ga_profile.md)
+  : Profile log-likelihood of one SIRD-GA parameter
+- [`sird_ga_loglik_prev()`](https://raydonal.github.io/epicurves/reference/sird_ga_loglik_prev.md)
+  : Fast Kalman log-likelihood for prevalence observations
+
+## SIRD-GA: dynamics, simulation and the prevalence model
+
+- [`sird_drift()`](https://raydonal.github.io/epicurves/reference/sird_drift.md)
+  : Deterministic SIRD drift vector
+
+- [`sird_jacobian()`](https://raydonal.github.io/epicurves/reference/sird_jacobian.md)
+  : Jacobian of the SIRD drift vector
+
+- [`sird_diffusion()`](https://raydonal.github.io/epicurves/reference/sird_diffusion.md)
+  : Diffusion covariance matrix of the SIRD jump process
+
+- [`sird_sigma()`](https://raydonal.github.io/epicurves/reference/sird_sigma.md)
+  : Diffusion "square-root" factor of the SIRD jump process
+
+- [`sird_R0()`](https://raydonal.github.io/epicurves/reference/sird_R0.md)
+  : Basic reproduction number of the SIRD model
+
+- [`sird_ode_solve()`](https://raydonal.github.io/epicurves/reference/sird_ode_solve.md)
+  : Solve the deterministic normalised SIRD ODE system
+
+- [`sird_gillespie()`](https://raydonal.github.io/epicurves/reference/sird_gillespie.md)
+  : Exact stochastic simulation of the SIRD jump process (Gillespie
+  algorithm)
+
+- [`sird_ga_simulate_obs()`](https://raydonal.github.io/epicurves/reference/sird_ga_simulate_obs.md)
+  : Simulate partially-observed SIRD-GA surveillance data
+
+- [`sird_ga_transition()`](https://raydonal.github.io/epicurves/reference/sird_ga_transition.md)
+  : Solve the SIRD-GA state-space transition quantities
+
+- [`sird_ga_Ak()`](https://raydonal.github.io/epicurves/reference/sird_ga_Ak.md)
+  :
+
+  Resolvent matrix \\A\_{k-1} = \Phi(t_k, t\_{k-1})\\ of interval `k`
+
+- [`sird_ga_Fk()`](https://raydonal.github.io/epicurves/reference/sird_ga_Fk.md)
+  :
+
+  Drift increment \\F_k\\ of interval `k`
+
+- [`sird_ga_Qk()`](https://raydonal.github.io/epicurves/reference/sird_ga_Qk.md)
+  :
+
+  State-noise covariance \\Q_k\\ of interval `k`
+
+- [`sird_ga_loglik()`](https://raydonal.github.io/epicurves/reference/sird_ga_loglik.md)
+  : Kalman-filter log-likelihood of the SIRD-GA state-space model
+
+- [`sird_ga_fit()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit.md)
+  : Maximum (approximate) likelihood estimation for the SIRD-GA model
+
+- [`sird_ga_fit_multistart()`](https://raydonal.github.io/epicurves/reference/sird_ga_fit_multistart.md)
+  : Multi-start SIRD-GA fitting, with a practical-identifiability
+  summary
+
+- [`sird_ga_bootstrap()`](https://raydonal.github.io/epicurves/reference/sird_ga_bootstrap.md)
+  : Parametric bootstrap confidence intervals for the SIRD-GA MLE
+
+## Growth curves on daily counts
+
+- [`logistic_curve()`](https://raydonal.github.io/epicurves/reference/logistic_curve.md)
+  : Logistic growth curve
+- [`gompertz_curve()`](https://raydonal.github.io/epicurves/reference/gompertz_curve.md)
+  : Gompertz growth curve
+- [`richards_curve()`](https://raydonal.github.io/epicurves/reference/richards_curve.md)
+  : Richards growth curve
+- [`growth_incidence()`](https://raydonal.github.io/epicurves/reference/growth_incidence.md)
+  : Daily incidence implied by a growth curve
+- [`fit_growth_incidence()`](https://raydonal.github.io/epicurves/reference/fit_growth_incidence.md)
+  : Fit one growth curve to daily counts by maximum likelihood
+- [`fit_ensemble_incidence()`](https://raydonal.github.io/epicurves/reference/fit_ensemble_incidence.md)
+  : Ensemble of growth curves fitted to daily counts
+- [`predict_band()`](https://raydonal.github.io/epicurves/reference/predict_band.md)
+  : Forecast band of a growth-incidence fit
+
+## Segmentation of epidemic curves
+
+- [`bic_segment()`](https://raydonal.github.io/epicurves/reference/bic_segment.md)
+  : Offline segmentation of daily counts by penalised likelihood
+- [`edetect_segment()`](https://raydonal.github.io/epicurves/reference/edetect_segment.md)
+  : Online segmentation of an epidemic curve with e-detectors
+
+## Ensembles on cumulative counts (earlier approach)
+
+- [`fit_growth_model()`](https://raydonal.github.io/epicurves/reference/fit_growth_model.md)
+  : Fit a single growth-curve model by nonlinear least squares
+- [`ensemble_weights()`](https://raydonal.github.io/epicurves/reference/ensemble_weights.md)
+  : Inverse-criterion ensemble weights
+- [`fit_ensemble()`](https://raydonal.github.io/epicurves/reference/fit_ensemble.md)
+  : Fit the full ensemble of growth-curve models to one data window
+- [`predict(`*`<ensemble_fit>`*`)`](https://raydonal.github.io/epicurves/reference/predict.ensemble_fit.md)
+  : Predict the ensemble curve at arbitrary times
+- [`ensemble_bootstrap_ci()`](https://raydonal.github.io/epicurves/reference/ensemble_bootstrap_ci.md)
+  : Bootstrap confidence band for an ensemble fit
+- [`ensemble_bootstrap_params()`](https://raydonal.github.io/epicurves/reference/ensemble_bootstrap_params.md)
+  : Bootstrap confidence intervals for each growth model's parameters
+- [`split_mse()`](https://raydonal.github.io/epicurves/reference/split_mse.md)
+  : Mean squared error of a split at a single candidate partition point
+- [`split_mse_single()`](https://raydonal.github.io/epicurves/reference/split_mse_single.md)
+  : Best single-model split MSE at a candidate partition point (fast
+  proxy)
+- [`find_partition_point()`](https://raydonal.github.io/epicurves/reference/find_partition_point.md)
+  : Grid search for a single structural change (partition) point
+- [`permutation_test_partition()`](https://raydonal.github.io/epicurves/reference/permutation_test_partition.md)
+  : Permutation test for a single candidate structural change point
+- [`fit_piecewise_ensemble()`](https://raydonal.github.io/epicurves/reference/fit_piecewise_ensemble.md)
+  : Sequential piecewise ensemble model
+- [`predict(`*`<piecewise_fit>`*`)`](https://raydonal.github.io/epicurves/reference/predict.piecewise_fit.md)
+  : Predict from a piecewise ensemble fit
+- [`smooth_series()`](https://raydonal.github.io/epicurves/reference/smooth_series.md)
+  : Centered moving-average smoother
+
+## Plotting
+
+- [`plot_ensemble_fit()`](https://raydonal.github.io/epicurves/reference/plot_ensemble_fit.md)
+  : Plot an ensemble fit against the observed data
+- [`plot_partition_profile()`](https://raydonal.github.io/epicurves/reference/plot_partition_profile.md)
+  : Plot an MSE (or AIC) profile from a partition-point grid search
+- [`plot_piecewise_fit()`](https://raydonal.github.io/epicurves/reference/plot_piecewise_fit.md)
+  : Plot a fitted piecewise ensemble curve, with confirmed partition
+  points
+- [`plot_sird_ga_fit()`](https://raydonal.github.io/epicurves/reference/plot_sird_ga_fit.md)
+  : Plot observed vs. fitted SIRD-GA incidence, with an optional
+  bootstrap band
+
+## Data
+
+- [`paraiba_covid19`](https://raydonal.github.io/epicurves/reference/paraiba_covid19.md)
+  : COVID-19 surveillance data, Paraíba, Brazil (2020)
+- [`paraiba_population`](https://raydonal.github.io/epicurves/reference/paraiba_population.md)
+  : Population of Paraíba, Brazil
+
+# Articles
+
+### Articles
+
+- [Compartmental models from surveillance
+  counts](https://raydonal.github.io/epicurves/articles/compartmental-models.md):
+- [SIRD-GA from daily cases and
+  deaths](https://raydonal.github.io/epicurves/articles/sird-ga-article.md):
+- [Growth-curve ensembles and phases of an
+  epidemic](https://raydonal.github.io/epicurves/articles/piecewise-ensemble-article.md):

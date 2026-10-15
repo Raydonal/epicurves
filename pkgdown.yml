@@ -1,0 +1,11 @@
+pandoc: 3.1.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  compartmental-models: compartmental-models.html
+  piecewise-ensemble-article: piecewise-ensemble-article.html
+  sird-ga-article: sird-ga-article.html
+last_built: 2026-10-15T22:28Z
+urls:
+  reference: https://raydonal.github.io/epicurves/reference
+  article: https://raydonal.github.io/epicurves/articles

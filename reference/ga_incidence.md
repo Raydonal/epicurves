@@ -1,0 +1,39 @@
+# Observation streams for the Gaussian-approximation likelihood
+
+`ga_incidence()` describes counts of an event over each observation
+interval (new infections, new deaths, new hospital admissions);
+`ga_prevalence()` describes counts of a compartment at the end of each
+interval. Reported counts are modelled as a binomial thinning of the
+latent count with probability `prob` plus Gaussian measurement error
+with variance `noise` times the latent count, approximated by a Gaussian
+with the same mean and variance.
+
+## Usage
+
+``` r
+ga_incidence(event, prob = 1, noise = 0)
+
+ga_prevalence(compartment, prob = 1, noise = 0)
+```
+
+## Arguments
+
+- event:
+
+  Name of an event of the model.
+
+- prob:
+
+  Name of the reporting-probability parameter, or a number in `(0, 1]`.
+
+- noise:
+
+  Name of the measurement-error parameter, or a non-negative number.
+
+- compartment:
+
+  Name of a compartment of the model.
+
+## Value
+
+An object of class `ga_obs`.
