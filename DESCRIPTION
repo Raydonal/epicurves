@@ -22,7 +22,7 @@ Description: Likelihood-based tools for epidemic curves. Stochastic
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-URL: https://github.com/Raydonal/epicurves
+URL: https://raydonal.github.io/epicurves/, https://github.com/Raydonal/epicurves
 BugReports: https://github.com/Raydonal/epicurves/issues
 Depends:
     R (>= 4.1)
