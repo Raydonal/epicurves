@@ -31,6 +31,7 @@ Imports:
     Rcpp,
     ggplot2,
     minpack.lm,
+    parallel,
     stats
 Suggests:
     dplyr,

@@ -1,53 +1,69 @@
-# epicurves
+# epicurves <img src="man/figures/logo.png" align="right" height="139" alt="epicurves logo" />
 
-Reference implementation accompanying two companion manuscripts derived from
-Oliveira's doctoral thesis on COVID-19 epidemic curve modelling (Ospina,
-Oliveira & Ferraz):
+Likelihood inference for epidemic curves. The package accompanies two
+manuscripts in preparation derived from Jaciele Oliveira's doctoral thesis
+(Programa de Pós-Graduação em Estatística, UFPE) and reproduces their
+analyses.
 
-- **SIRD-GA**: a stochastic SIRD model estimated by Gaussian-diffusion
-  approximation of the underlying density-dependent Markov jump process,
-  with maximum-likelihood estimation via a Kalman filter under partial
-  observation and under-reporting.
-- **Piecewise ensemble growth model**: Logistic, Gompertz and Richards
-  growth curves combined by MSE- or AIC-based weights, with structural
-  change points ("partition points") identified by sequential grid search.
+- **Stochastic compartmental models under the Gaussian approximation.** Any
+  mass-action model is declared by its events (`ga_model()`, `ga_event()`),
+  observed through the incidence of events or the prevalence of compartments,
+  with under-reporting and time-varying rates, and fitted by maximum
+  likelihood with a Kalman filter (`ga_fit()`, `ga_profile()`,
+  `ga_bootstrap()`). The SIRD model fitted to daily cases and deaths has a
+  dedicated interface (`sird_ga_fit_inc()`, `sird_ga_fit_tv()`).
+- **Growth-curve ensembles on daily counts.** Logistic, Gompertz and Richards
+  curves are fitted by Poisson or negative binomial likelihood and combined
+  with Akaike weights (`fit_ensemble_incidence()`); a series is divided into
+  phases by penalised likelihood (`bic_segment()`) or by anytime-valid
+  sequential e-detectors (`edetect_segment()`).
 
-The package reproduces every simulation study, table and figure reported in
-the two manuscripts, and includes a `paraiba_covid19` dataset (the real
-COVID-19 surveillance series for Paraíba, Brazil, used in both
-applications).
+The `paraiba_covid19` dataset holds the COVID-19 surveillance series for
+Paraíba, Brazil, used in both applications.
 
 ## Installation
 
 ```r
-# from a local clone:
-devtools::install("path/to/epicurves")
+# install.packages("remotes")
+remotes::install_github("Raydonal/epicurves")
+
+# optional, needed by edetect_segment():
+remotes::install_github("castlaboratory/edetect")
 ```
 
-## Usage
+## Example
+
+Declare a SIRD model, simulate reported cases and deaths, and fit it:
 
 ```r
 library(epicurves)
 
-# SIRD-GA: simulate, then estimate
-sim <- sird_ga_simulate_obs(N = 20000, S0 = 19980, I0 = 20, R0 = 0,
-                             lambda = 0.4, gamma = 0.15, alpha = 0.08,
-                             p = 0.6, tau2 = 0.2, Tmax = 100)
-fit <- sird_ga_fit(sim$y, N = 20000,
-                    start = list(lambda = 0.3, gamma = 0.1, alpha = 0.1,
-                                 i0 = 0.002, p = 0.5, tau2 = 0.3))
-sird_R0(fit$theta[["lambda"]], fit$theta[["gamma"]], fit$theta[["alpha"]])
+sird <- ga_model(c("S", "I", "R", "D"), list(
+  infection = ga_event("S", "I", rate = "lambda", by = "I"),
+  recovery  = ga_event("I", "R", rate = "gamma"),
+  death     = ga_event("I", "D", rate = "alpha")))
+obs <- list(cases  = ga_incidence("infection", prob = "p", noise = "tau2"),
+            deaths = ga_incidence("death", prob = 1, noise = "tau2_d"))
 
-# Piecewise ensemble: identify structural change points
-data(paraiba_covid19)
-pw <- fit_piecewise_ensemble(paraiba_covid19$deaths[paraiba_covid19$deaths > 0 |
-                                                       seq_along(paraiba_covid19$deaths) > 1])
-pw$cuts
+truth <- list(lambda = 0.6, gamma = 0.3, alpha = 0.1, p = 0.5, tau2 = 0.2, tau2_d = 0.1)
+set.seed(1)
+sim <- ga_simulate(sird, truth, c(S = 19990, I = 10, R = 0, D = 0), obs, n = 80)
+
+init <- function(p) c(S = 1 - p$i0, I = p$i0, R = 0, D = 0)
+fit <- ga_fit(sird, sim$data, obs, N = 20000, init = init,
+              start = list(lambda = 0.5, gamma = 0.25, alpha = 0.15, i0 = 1e-3,
+                           p = 0.6, tau2 = 0.3, tau2_d = 0.3))
+confint(fit)
 ```
 
-## Status
+Divide the daily deaths in Paraíba into phases:
 
-Research code accompanying manuscripts in preparation. See `NEWS.md` for
-notable methodological findings made while validating this package against
-the thesis (including a sign correction to the Richards growth-curve
-equation and a changepoint-confirmation robustness analysis).
+```r
+data(paraiba_covid19)
+seg <- bic_segment(paraiba_covid19$new_deaths, d_min = 12, family = "negbin", step = 5)
+paraiba_covid19$date[seg$cuts]
+```
+
+The articles on the package website work through both methods in detail.
+`NEWS.md` records the findings made while validating the package against the
+thesis.

@@ -54,3 +54,13 @@ test_that("sird_ga_fit recovers R0 and lambda to reasonable accuracy on simulate
   expect_equal(R0_hat, R0_true, tolerance = 0.3)
   expect_equal(unname(fit$theta[["lambda"]]), unname(theta_true[["lambda"]]), tolerance = 0.3)
 })
+
+test_that("Simpson Q_k agrees with the joint RK4 integration in every interval", {
+  x0 <- c(1 - 5e-4, 5e-4, 0); n <- 30
+  ref <- sird_ga_transition_cpp(n, 1, x0, 0.6, 0.3, 0.1, 400)$M
+  tr <- sird_ga_transition(0:n, x0, list(lambda = 0.6, gamma = 0.3, alpha = 0.1), n_sub = 20)
+  for (k in c(1, 2, 15, n)) {
+    expect_equal(tr$segments[[k]]$P[, , 1], diag(3))
+    expect_lt(norm(sird_ga_Qk(tr, k, 1) - ref[, , k], "F") / norm(ref[, , k], "F"), 1e-4)
+  }
+})

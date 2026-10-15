@@ -1,4 +1,4 @@
-url: ~
+url: https://raydonal.github.io/epicurves/
 title: epicurves
 template:
   bootstrap: 5
@@ -35,7 +35,9 @@ reference:
       - ga_simulate
       - ga_fit
       - ga_profile
+      - ga_bootstrap
       - confint.ga_fit
+      - confint.ga_boot
       - predict.ga_fit
       - plot.ga_fit
   - title: "SIRD-GA from daily cases and deaths"

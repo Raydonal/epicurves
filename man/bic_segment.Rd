@@ -35,7 +35,8 @@ candidate day maximising the summed ensemble log-likelihood of the two
 halves, and the split is kept only if it lowers the Bayesian information
 criterion, with the split charged for the parameters of one additional
 curve and the change location. The parameter count of an ensemble is the
-weight-averaged count of its members (three for every curve used here):
+weight-averaged count of its members (three per curve with Poisson counts,
+four with negative binomial counts):
 the members are alternative descriptions of a single mean, not additive
 components. Each half is fitted by \code{\link[=fit_ensemble_incidence]{fit_ensemble_incidence()}}.
 }

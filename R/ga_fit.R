@@ -24,7 +24,8 @@
 #' @param maxit Iteration limit of each Nelder-Mead run.
 #' @return An object of class `ga_fit` with elements `coef` (estimates on the
 #'   natural scale, block-specific values named `name[b]`), `loglik`,
-#'   `par` and `hessian` (unconstrained scale), `vcov` (on that scale),
+#'   `convergence` (the `optim` code of the final run), `par` and `hessian`
+#'   (unconstrained scale), `vcov` (on that scale),
 #'   `starts` (log-likelihood reached from each start) and the inputs needed
 #'   by [ga_profile()], [confint.ga_fit()] and [predict.ga_fit()].
 #' @export
@@ -68,7 +69,8 @@ ga_fit <- function(model, data, obs, N, init, start, fixed = list(), unit = NULL
   if (!is.null(V)) dimnames(V) <- list(lab, lab)
   th <- unpack(best$par)
   coef <- unlist(lapply(free, function(p) th[[p]])); names(coef) <- lab
-  structure(list(coef = coef, loglik = -best$value, par = best$par, hessian = H, vcov = V,
+  structure(list(coef = coef, loglik = -best$value, convergence = best$convergence,
+                 par = best$par, hessian = H, vcov = V,
                  starts = data.frame(start = seq_along(runs), loglik = -vals),
                  theta = th, free = free, unit = unit, blocks = blocks, fixed = fixed,
                  call_args = list(model = model, data = data, obs = obs, N = N, init = init,

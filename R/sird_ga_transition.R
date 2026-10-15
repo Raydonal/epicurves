@@ -69,6 +69,9 @@ sird_ga_transition <- function(times, x0, parms, n_sub = 10L) {
     x_mat <- out[rows, 2:4, drop = FALSE]
     P_arr <- array(0, dim = c(3L, 3L, length(rows)))
     for (j in seq_along(rows)) P_arr[, , j] <- matrix(out[rows[j], 5:13], nrow = 3L)
+    # deSolve records the pre-event value at an event time, so the row at t_{k-1}
+    # holds Phi(t_{k-1}, t_{k-2}) rather than the reset value
+    P_arr[, , 1L] <- diag(3)
     segments[[k]] <- list(t = out[rows, 1], x = x_mat, P = P_arr)
   }
 

@@ -60,7 +60,8 @@ observation interval; the parameter then takes one value per block.}
 \value{
 An object of class \code{ga_fit} with elements \code{coef} (estimates on the
 natural scale, block-specific values named \code{name[b]}), \code{loglik},
-\code{par} and \code{hessian} (unconstrained scale), \code{vcov} (on that scale),
+\code{convergence} (the \code{optim} code of the final run), \code{par} and \code{hessian}
+(unconstrained scale), \code{vcov} (on that scale),
 \code{starts} (log-likelihood reached from each start) and the inputs needed
 by \code{\link[=ga_profile]{ga_profile()}}, \code{\link[=confint.ga_fit]{confint.ga_fit()}} and \code{\link[=predict.ga_fit]{predict.ga_fit()}}.
 }

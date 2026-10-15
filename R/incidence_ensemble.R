@@ -290,7 +290,8 @@ edetect_segment <- function(x, d_min = 20L, arl = 1000, refit_every = 7L,
 #' halves, and the split is kept only if it lowers the Bayesian information
 #' criterion, with the split charged for the parameters of one additional
 #' curve and the change location. The parameter count of an ensemble is the
-#' weight-averaged count of its members (three for every curve used here):
+#' weight-averaged count of its members (three per curve with Poisson counts,
+#' four with negative binomial counts):
 #' the members are alternative descriptions of a single mean, not additive
 #' components. Each half is fitted by [fit_ensemble_incidence()].
 #'

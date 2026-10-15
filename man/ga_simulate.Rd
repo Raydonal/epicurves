@@ -4,7 +4,7 @@
 \alias{ga_simulate}
 \title{Exact simulation of a compartmental model and its surveillance counts}
 \usage{
-ga_simulate(model, theta, init_counts, obs, n, Delta = 1)
+ga_simulate(model, theta, init_counts, obs, n, Delta = 1, varying = NULL)
 }
 \arguments{
 \item{model}{A \code{\link[=ga_model]{ga_model()}}.}
@@ -19,6 +19,10 @@ any parameters named in \code{obs}.}
 \item{n}{Number of intervals.}
 
 \item{Delta}{Length of the observation interval.}
+
+\item{varying}{Optional named list of rate parameters that change between
+intervals, each a vector of length \code{n} (as in \code{\link[=ga_loglik]{ga_loglik()}}); a rate
+listed here may be absent from \code{theta}.}
 }
 \value{
 A list with \code{data} (matrix of reported counts, one column per

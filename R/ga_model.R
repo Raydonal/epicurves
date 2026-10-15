@@ -188,19 +188,24 @@ ga_loglik <- function(model, theta, init, data, obs, N, Delta = 1, nsub = 10L,
 #' @inheritParams ga_loglik
 #' @param init_counts Named integer vector of initial counts per compartment.
 #' @param n Number of intervals.
+#' @param varying Optional named list of rate parameters that change between
+#'   intervals, each a vector of length `n` (as in [ga_loglik()]); a rate
+#'   listed here may be absent from `theta`.
 #' @return A list with `data` (matrix of reported counts, one column per
 #'   stream), `latent` (matrix of latent counts per stream) and `states`
 #'   (compartment counts at the end of each interval, first row the initial
 #'   state).
 #' @export
-ga_simulate <- function(model, theta, init_counts, obs, n, Delta = 1) {
+ga_simulate <- function(model, theta, init_counts, obs, n, Delta = 1, varying = NULL) {
   theta <- as.list(theta)
   x <- as.numeric(init_counts[model$compartments]); names(x) <- model$compartments
   N <- sum(x)
   E <- length(model$events)
   from <- match(vapply(model$events, `[[`, "", "from"), model$compartments)
   by <- vapply(model$events, function(e) if (is.null(e$by)) NA_integer_ else match(e$by, model$compartments), 1L)
-  k <- vapply(model$events, function(e) as.numeric(theta[[e$rate]]), 1)
+  rate <- vapply(model$events, `[[`, "", "rate")
+  for (p in names(varying)) stopifnot(length(varying[[p]]) == n)
+  k <- vapply(rate, function(p) as.numeric(if (p %in% names(varying)) varying[[p]][1] else theta[[p]]), 1)
   V <- model$V
   states <- matrix(NA_real_, n + 1, length(x), dimnames = list(NULL, model$compartments))
   states[1, ] <- x
@@ -208,6 +213,7 @@ ga_simulate <- function(model, theta, init_counts, obs, n, Delta = 1) {
   t <- 0
   for (j in seq_len(n)) {
     tend <- j * Delta
+    for (p in names(varying)) k[rate == p] <- varying[[p]][j]
     repeat {
       r <- k * x[from] * ifelse(is.na(by), 1, x[by] / N)
       tot <- sum(r)

@@ -1,5 +1,29 @@
 # epicurves 0.0.0.9000
 
+## Parametric bootstrap for the general engine
+
+`ga_bootstrap()` simulates data sets from a `ga_fit()` result with
+`ga_simulate()`, refits them from the estimates and returns the replicates of
+any statistic of the fit, with percentile and basic intervals
+(`confint.ga_boot()`). Missing values of the original data stay missing, and
+replicate seeds are drawn from the current stream, so results do not depend on
+the number of cores. To support fits with time-varying rates, `ga_simulate()`
+gained a `varying` argument, and `ga_fit()` now returns the `optim`
+convergence code.
+
+## Simpson quadrature of `Q_k` fixed at the start of each interval
+
+`sird_ga_transition()` stored, as the first node of every interval after the
+first, the resolvent of the previous interval instead of the identity:
+`deSolve` records the pre-event value at an event time, so the row at
+`t_{k-1}` held `Phi(t_{k-1}, t_{k-2})`. That node enters Simpson's rule with
+weight `h/3`, which made the error of `sird_ga_Qk()` decrease only in
+proportion to the step (2.7% with 10 substeps, 0.34% with 80). With the node
+reset, the error is about 1e-5 against the joint RK4 reference, limited by the
+`lsoda` tolerance. Only the prevalence path (`sird_ga_loglik()`,
+`sird_ga_fit()`) used this function; the incidence path and `ga_*()` never did,
+so no result of the articles changes.
+
 ## Generic compartmental engine rewritten (`ga_model()` and friends)
 
 `ga_model()`, `ga_event()`, `ga_incidence()`, `ga_prevalence()`,
@@ -9,9 +33,9 @@ earlier closure-based engine (`new_jump_model()`, `general_ga_*()`,
 (`src/ga_generic.cpp`) handles any mass-action model with all compartments
 explicit, integrates the mean, the resolvent and the Lyapunov equation of the
 state-noise covariance jointly by RK4 (the old engine obtained `Q_k` by
-Simpson quadrature on the stored ODE grid, with relative errors of 0.3% to
-3% for 10 to 80 Simpson substeps against 1.5e-8 to 3.6e-6 for 20 to 5 RK4 steps in
-`Articles/Article1_SIRD-GA/analysis/check_Qk.R`), observes event incidence
+Simpson quadrature on the stored ODE grid; the relative errors of 0.3% to
+3% that `check_Qk.R` first reported for it came from the endpoint defect
+described above, not from the quadrature), observes event incidence
 through cumulative event counters in an augmented state, and allows
 piecewise-constant rate parameters. On SIRD with daily cases and deaths it
 reproduces `sird_ga_loglik_inc()` to within 2e-10 in the log-likelihood,
