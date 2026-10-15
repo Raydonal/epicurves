@@ -1,0 +1,60 @@
+
+== scenario nc_log, J = 60, true cuts: 
+  arl            rule failed mean_cuts any_false false_per_rep detect
+  100  edetect_arl100      0     0.250     0.233         0.250     NA
+  200  edetect_arl200      0     0.167     0.150         0.167     NA
+  365  edetect_arl365      0     0.150     0.133         0.150     NA
+ 1000 edetect_arl1000      0     0.100     0.100         0.100     NA
+ median_delay mean_delay
+           NA        NaN
+           NA        NaN
+           NA        NaN
+           NA        NaN
+
+== scenario nc_gom, J = 60, true cuts: 
+  arl            rule failed mean_cuts any_false false_per_rep detect
+  100  edetect_arl100      0     0.300     0.283         0.300     NA
+  200  edetect_arl200      0     0.233     0.217         0.233     NA
+  365  edetect_arl365      0     0.200     0.183         0.200     NA
+ 1000 edetect_arl1000      0     0.133     0.133         0.133     NA
+ median_delay mean_delay
+           NA        NaN
+           NA        NaN
+           NA        NaN
+           NA        NaN
+
+== scenario 1c, J = 60, true cuts: 70 95 135
+  arl            rule failed mean_cuts any_false false_per_rep detect
+  100  edetect_arl100      0      1.97     0.383         0.417  0.517
+  200  edetect_arl200      0      1.88     0.317         0.350  0.511
+  365  edetect_arl365      0      1.73     0.250         0.267  0.489
+ 1000 edetect_arl1000      0      1.55     0.200         0.200  0.450
+ median_delay mean_delay
+            3       3.83
+            3       4.26
+            4       4.74
+            4       5.09
+
+== scenario 2c, J = 60, true cuts: 38 94 121 146
+  arl            rule failed mean_cuts any_false false_per_rep detect
+  100  edetect_arl100      0      1.85     0.433         0.533  0.329
+  200  edetect_arl200      0      1.65     0.350         0.383  0.317
+  365  edetect_arl365      0      1.60     0.317         0.350  0.312
+ 1000 edetect_arl1000      0      1.50     0.300         0.333  0.292
+ median_delay mean_delay
+          6.0       5.54
+          6.0       5.74
+          6.0       6.11
+          6.5       7.46
+
+== scenario 3c, J = 60, true cuts: 40 89 128 145 166
+  arl            rule failed mean_cuts any_false false_per_rep detect
+  100  edetect_arl100      0      1.23     0.183         0.217  0.203
+  200  edetect_arl200      0      1.20     0.150         0.183  0.203
+  365  edetect_arl365      0      1.17     0.117         0.133  0.207
+ 1000 edetect_arl1000      0      1.15     0.100         0.117  0.207
+ median_delay mean_delay
+            1       1.48
+            1       1.52
+            1       1.58
+            2       1.89

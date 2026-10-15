@@ -1,0 +1,23 @@
+ curve phi              rule  J any_cut mean_cuts
+   log   3        pl_poisson 60  1.0000    5.3667
+   log   3         pl_negbin 60  0.0167    0.0167
+   log   3     ed_poisson_z1 60  1.0000    4.3667
+   log   3 ed_subgaussian_z0 60  0.9333    2.5500
+   log   3 ed_subgaussian_z1 60  0.4833    0.6167
+   gom   3        pl_poisson 60  0.9833    6.2333
+   gom   3         pl_negbin 60  0.0000    0.0000
+   gom   3     ed_poisson_z1 60  1.0000    4.8667
+   gom   3 ed_subgaussian_z0 60  0.8500    2.3167
+   gom   3 ed_subgaussian_z1 60  0.5000    0.6833
+   log  10        pl_poisson 60  0.5833    1.2167
+   log  10         pl_negbin 60  0.0000    0.0000
+   log  10     ed_poisson_z1 60  0.9500    2.1000
+   log  10 ed_subgaussian_z0 60  0.9167    2.0667
+   log  10 ed_subgaussian_z1 60  0.3333    0.3500
+   gom  10        pl_poisson 60  0.7667    1.7167
+   gom  10         pl_negbin 60  0.0000    0.0000
+   gom  10     ed_poisson_z1 60  1.0000    2.5667
+   gom  10 ed_subgaussian_z0 60  0.9333    2.2167
+   gom  10 ed_subgaussian_z1 60  0.5667    0.6833
+
+sub-Gaussian z = 1: 113 series with a false alarm; first alarm by day 30 (first 10 monitored days) in 37 (0.33)

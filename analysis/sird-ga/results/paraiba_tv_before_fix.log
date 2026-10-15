@@ -1,0 +1,6 @@
+weeks 13 52 n = 40 blocks = 10 
+inv_sympd(): matrix is singular or not positive definite
+start D=7: ll=754.40  1/(g+a)=6.45 days  alpha/(g+a)=0.0015  p=0.066  i0N=55 tau2=3.97 tau2d=2.39 (111s)
+  R_t by block: 2.47 1.21 1.06 0.9 0.91 0.86 0.93 0.96 1.11 1.19 
+start D=10: ll=754.40  1/(g+a)=6.46 days  alpha/(g+a)=0.0015  p=0.066  i0N=54 tau2=3.97 tau2d=2.39 (91s)
+  R_t by block: 2.47 1.21 1.06 0.9 0.91 0.86 0.93 0.96 1.11 1.19 

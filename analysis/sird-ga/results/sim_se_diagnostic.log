@@ -1,0 +1,15 @@
+sim_s1_N100000.rds           SE/SD: 0.98 1.07 0.99 0.87 | bias/SD: -0.14 -0.10 0.15 0.26 | mean tries 1.04
+sim_s1_N20000.rds            SE/SD: 0.37 0.45 0.52 0.57 | bias/SD: 0.64 0.58 0.55 0.41 | mean tries 1.04
+sim_s1_N5000.rds             SE/SD: 0.15 0.24 0.26 0.44 | bias/SD: 1.19 1.18 1.27 1.00 | mean tries 1.01
+sim_s2_N100000.rds           SE/SD: 0.84 0.90 0.78 0.69 | bias/SD: -0.17 -0.12 0.01 0.17 | mean tries 1.02
+sim_s2_N20000.rds            SE/SD: 0.40 0.49 0.62 0.63 | bias/SD: 0.53 0.49 0.48 0.35 | mean tries 1.02
+sim_s2_N5000.rds             SE/SD: 0.26 0.34 0.47 0.44 | bias/SD: 0.73 0.67 0.86 0.59 | mean tries 1.03
+sim_s3_N100000.rds           SE/SD: 0.87 0.96 0.95 0.79 | bias/SD: -0.07 -0.09 0.01 0.17 | mean tries 1.00
+sim_s3_N20000.rds            SE/SD: 0.38 0.49 0.70 0.19 | bias/SD: 0.47 0.47 0.49 0.37 | mean tries 1.01
+sim_s3_N5000.rds             SE/SD: 0.30 0.49 0.51 0.16 | bias/SD: 0.38 0.44 0.56 0.58 | mean tries 1.06
+sim_s4_N100000.rds           SE/SD: 0.49 0.40 0.72 0.60 | bias/SD: 0.45 0.42 0.29 0.06 | mean tries 1.21
+sim_s4_N20000.rds            SE/SD: 0.33 0.40 0.45 0.05 | bias/SD: 0.65 0.34 0.78 0.34 | mean tries 1.23
+sim_s4_N5000.rds             SE/SD: 0.25 0.38 0.40 0.28 | bias/SD: 0.08 -0.67 1.09 0.94 | mean tries 1.32
+sim_s5_N100000.rds           SE/SD: 0.56 0.67 0.91 0.68 | bias/SD: 0.42 0.26 0.25 0.08 | mean tries 1.00
+sim_s5_N20000.rds            SE/SD: 0.31 0.38 0.64 0.35 | bias/SD: 0.86 0.63 0.76 0.13 | mean tries 1.00
+sim_s5_N5000.rds             SE/SD: 0.20 0.34 0.52 0.04 | bias/SD: 1.07 0.70 1.51 0.29 | mean tries 1.00

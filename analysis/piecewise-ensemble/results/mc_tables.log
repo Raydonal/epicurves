@@ -1,0 +1,49 @@
+\multirow{5}{*}{\parbox{2.6cm}{Logistic, no change}} & Proportional, cumulative & 2.98 & 0.08 & -- & 2.98 & -- & 25\\
+ & BIC, cumulative & 2.93 & 0.00 & -- & 2.93 & -- & 21\\
+ & Penalised likelihood & 0.00 & 1.00 & -- & 0.00 & -- & 34\\
+ & E-detector, $z=0$ & 0.90 & 0.38 & -- & 0.90 & -- & 13\\
+ & E-detector, $z=1$ & 0.10 & 0.90 & -- & 0.10 & -- & 15\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{Gompertz, no change}} & Proportional, cumulative & 2.77 & 0.15 & -- & 2.77 & -- & 28\\
+ & BIC, cumulative & 3.25 & 0.02 & -- & 3.25 & -- & 22\\
+ & Penalised likelihood & 0.00 & 1.00 & -- & 0.00 & -- & 28\\
+ & E-detector, $z=0$ & 0.75 & 0.53 & -- & 0.75 & -- & 9\\
+ & E-detector, $z=1$ & 0.13 & 0.87 & -- & 0.13 & -- & 10\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{1, continuous (3)}} & Proportional, cumulative & 5.13 & 0.12 & 0.87 & 2.50 & -- & 15\\
+ & BIC, cumulative & 4.42 & 0.18 & 0.83 & 1.90 & -- & 17\\
+ & Penalised likelihood & 1.50 & 0.00 & 0.42 & 0.23 & -- & 83\\
+ & E-detector, $z=0$ & 2.98 & 0.32 & 0.59 & 1.22 & 4 & 11\\
+ & E-detector, $z=1$ & 1.55 & 0.03 & 0.45 & 0.20 & 4 & 12\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{2, continuous (4)}} & Proportional, cumulative & 5.48 & 0.17 & 0.74 & 2.53 & -- & 15\\
+ & BIC, cumulative & 4.60 & 0.38 & 0.73 & 1.68 & -- & 16\\
+ & Penalised likelihood & 1.75 & 0.00 & 0.24 & 0.80 & -- & 76\\
+ & E-detector, $z=0$ & 2.97 & 0.20 & 0.45 & 1.15 & 5 & 9\\
+ & E-detector, $z=1$ & 1.50 & 0.00 & 0.29 & 0.33 & 6 & 11\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{3, continuous (5)}} & Proportional, cumulative & 4.90 & 0.33 & 0.66 & 1.58 & -- & 15\\
+ & BIC, cumulative & 4.43 & 0.42 & 0.64 & 1.23 & -- & 16\\
+ & Penalised likelihood & 1.42 & 0.00 & 0.25 & 0.18 & -- & 59\\
+ & E-detector, $z=0$ & 1.80 & 0.00 & 0.25 & 0.55 & 1 & 7\\
+ & E-detector, $z=1$ & 1.15 & 0.00 & 0.21 & 0.12 & 2 & 8\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{1, with spikes (3)}} & Proportional, cumulative & 5.35 & 0.05 & 0.92 & 2.58 & -- & 12\\
+ & BIC, cumulative & 4.40 & 0.08 & 0.87 & 1.77 & -- & 13\\
+ & Penalised likelihood & 2.05 & 0.18 & 0.59 & 0.27 & -- & 80\\
+ & E-detector, $z=0$ & 3.63 & 0.43 & 0.69 & 1.55 & 3 & 9\\
+ & E-detector, $z=1$ & 1.92 & 0.18 & 0.54 & 0.30 & 1 & 11\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{2, with spikes (4)}} & Proportional, cumulative & 5.50 & 0.13 & 0.86 & 2.05 & -- & 13\\
+ & BIC, cumulative & 4.73 & 0.30 & 0.87 & 1.27 & -- & 14\\
+ & Penalised likelihood & 4.32 & 0.27 & 0.71 & 1.48 & -- & 92\\
+ & E-detector, $z=0$ & 4.92 & 0.22 & 0.88 & 1.38 & 1 & 7\\
+ & E-detector, $z=1$ & 3.52 & 0.55 & 0.79 & 0.37 & 1 & 9\\
+\midrule
+\multirow{5}{*}{\parbox{2.6cm}{3, with spikes (5)}} & Proportional, cumulative & 5.50 & 0.38 & 0.92 & 0.88 & -- & 15\\
+ & BIC, cumulative & 5.02 & 0.67 & 0.95 & 0.25 & -- & 15\\
+ & Penalised likelihood & 8.00 & 0.00 & 0.97 & 3.05 & -- & 136\\
+ & E-detector, $z=0$ & 6.65 & 0.00 & 0.92 & 2.05 & 1 & 5\\
+ & E-detector, $z=1$ & 5.25 & 0.38 & 0.81 & 1.18 & 1 & 8\\
+
+% failures: 0

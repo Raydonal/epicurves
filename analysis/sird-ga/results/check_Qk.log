@@ -1,0 +1,27 @@
+(a) Scenario 1, daily intervals
+  RK4     steps=  2  Q rel.err=1.27e-04  A rel.err=3.14e-07
+  RK4     steps=  5  Q rel.err=3.64e-06  A rel.err=8.46e-09
+  RK4     steps= 10  Q rel.err=2.36e-07  A rel.err=5.38e-10
+  RK4     steps= 20  Q rel.err=1.50e-08  A rel.err=3.39e-11
+  RK4     steps= 40  Q rel.err=9.48e-10  A rel.err=2.13e-12
+  Simpson steps= 10  Q rel.err=1.10e-05
+  Simpson steps= 20  Q rel.err=1.27e-05
+  Simpson steps= 40  Q rel.err=1.75e-05
+  Simpson steps= 80  Q rel.err=1.82e-05
+(b) Paraiba fitted rates, weekly intervals
+  RK4     steps=  2  Q rel.err=8.67e-02  A rel.err=7.03e-03
+  RK4     steps=  5  Q rel.err=4.92e-03  A rel.err=2.60e-04
+  RK4     steps= 10  Q rel.err=4.01e-04  A rel.err=1.85e-05
+  RK4     steps= 20  Q rel.err=2.86e-05  A rel.err=1.23e-06
+  RK4     steps= 40  Q rel.err=1.91e-06  A rel.err=7.94e-08
+(c) log-likelihood at the fitted parameters versus 4000 steps
+  Paraiba     steps=  2  ll - ll_ref = -3.71e-02
+  Paraiba     steps=  5  ll - ll_ref = -2.04e-04
+  Paraiba     steps= 10  ll - ll_ref = -1.14e-05
+  Paraiba     steps= 20  ll - ll_ref = -7.66e-07
+  Paraiba     steps= 40  ll - ll_ref = -7.16e-08
+  Scenario 1  steps=  2  ll - ll_ref = -1.41e-03
+  Scenario 1  steps=  5  ll - ll_ref = -4.24e-05
+  Scenario 1  steps= 10  ll - ll_ref = -2.79e-06
+  Scenario 1  steps= 20  ll - ll_ref = -1.79e-07
+  Scenario 1  steps= 40  ll - ll_ref = -1.12e-08

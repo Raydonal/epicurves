@@ -1,0 +1,8 @@
+penalised likelihood cuts: 2020-07-24 2020-11-19  ( 277 s)
+e-detector cuts: 2020-04-26 2020-11-30  alarms: 2020-05-06 2020-12-03  ( 24 s)
+phase 1 : 2020-03-18 - 2020-07-24  weights gompertz richards logistic 
+       1        0        0 
+phase 2 : 2020-07-25 - 2020-11-19  weights gompertz richards logistic 
+   0.333    0.333    0.333 
+phase 3 : 2020-11-20 - 2020-12-31  weights gompertz richards logistic 
+   0.312    0.323    0.366 

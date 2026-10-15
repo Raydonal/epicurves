@@ -1,0 +1,26 @@
+Hessian eigenvalues (min, max): 1.25 211000 
+                estimate    lower    upper
+inf_period_days  6.46000  3.48000 1.20e+01
+ifr              0.00146  0.00106 2.05e-03
+p                0.06560  0.04800 9.01e-02
+i0N             54.10000 14.10000 2.06e+02
+tau2             3.97000  2.20000 7.09e+00
+tau2_d           2.39000  1.02000 5.39e+00
+attack           0.58600  0.37200 7.63e-01
+R_block1         2.47000  1.40000 4.36e+00
+R_block2         1.21000  0.87900 1.54e+00
+R_block3         1.06000  0.92500 1.19e+00
+R_block4         0.90000  0.82000 9.98e-01
+R_block5         0.90500  0.84400 1.01e+00
+R_block6         0.86000  0.79500 9.54e-01
+R_block7         0.92800  0.85100 9.93e-01
+R_block8         0.95900  0.86900 1.02e+00
+R_block9         1.11000  0.98900 1.19e+00
+R_block10        1.19000  1.01000 1.32e+00
+block epidemiological weeks: 13-16 17-20 21-24 25-28 29-32 33-36 37-40 41-44 45-48 49-52 
+weekly lambda: 2.691 1.385 1.366 1.348 1.526 1.577 1.799 1.946 2.375 2.876 
+loglik: 754.3979  convergence: 0 
+constant lambda: loglik=707.05 lambda=5.176 gamma=5.067 alpha=0.1012 R0=1.0014 p=0.901 tau2=2005
+parameters: time-varying 16  constant 7 
+null device 
+          1 

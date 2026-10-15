@@ -1,0 +1,35 @@
+15:22:07 start s1 N5000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s1_N5000.rds 100 reps
+15:35:58 start s1 N20000
+16:54:42 start profile_alpha_sim
+17:00:38 done profile_alpha_sim (exit 0)
+skip s1 N5000
+17:00:38 start s1 N20000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s1_N20000.rds 100 reps
+17:13:00 start s1 N100000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s1_N100000.rds 100 reps
+17:23:41 start s2 N5000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s2_N5000.rds 100 reps
+17:37:31 start s2 N20000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s2_N20000.rds 100 reps
+17:51:13 start s2 N100000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s2_N100000.rds 100 reps
+18:01:43 start s3 N5000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s3_N5000.rds 100 reps
+18:09:35 start s3 N20000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s3_N20000.rds 100 reps
+18:18:55 start s3 N100000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s3_N100000.rds 100 reps
+18:29:10 start s5 N5000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s5_N5000.rds 100 reps
+18:37:05 start s5 N20000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s5_N20000.rds 100 reps
+18:46:22 start s5 N100000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s5_N100000.rds 100 reps
+18:55:17 start s4 N5000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s4_N5000.rds 100 reps
+19:13:28 start s4 N20000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s4_N20000.rds 100 reps
+19:39:50 start s4 N100000
+done /home/raydonal/MEGA/Claude/Jaciele/Articles/Article1_SIRD-GA/analysis/results/sim_s4_N100000.rds 100 reps
+ALLDONE

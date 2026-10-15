@@ -1,0 +1,14 @@
+
+== cases 
+segment 1: 2020-03-18 to 2020-05-23 (67 days)  w(G,R,L)=0.88/0.034/0.087  size=13.3  mean count=112.1
+segment 2: 2020-05-24 to 2020-09-05 (105 days)  w(G,R,L)=0.453/0.254/0.293  size=3.2  mean count=971.6
+segment 3: 2020-09-06 to 2020-12-31 (117 days)  w(G,R,L)=0.332/0.334/0.334  size=2.1  mean count=486.8
+sub-Gaussian z=1 alarms: 2020-04-08 2020-07-03 2020-11-21  delays: 1 18 12 
+
+== deaths 
+segment 1: 2020-03-18 to 2020-07-24 (129 days)  w(G,R,L)=1/0/0  size=11.5  mean count=12.8
+segment 2: 2020-07-25 to 2020-11-19 (118 days)  w(G,R,L)=0.333/0.333/0.333  size=475275791965830760103936.0  mean count=13.4
+segment 3: 2020-11-20 to 2020-12-31 (42 days)  w(G,R,L)=0.312/0.323/0.366  size=34575733725.4  mean count=10.5
+sub-Gaussian z=1 alarms: 2020-05-06 2020-12-03  delays: 10 3 
+null device 
+          1 

@@ -1,0 +1,29 @@
+2026-10-15 12:42:51 start log phi=3
+== log, phi = 3, J = 60
+pl_poisson         failed  0  mean cuts 5.37  share with any cut 1.00  median secs 159.6
+pl_negbin          failed  0  mean cuts 0.02  share with any cut 0.02  median secs 95.7
+ed_poisson_z1      failed  0  mean cuts 4.37  share with any cut 1.00  median secs 11.9
+ed_subgaussian_z0  failed  0  mean cuts 2.55  share with any cut 0.93  median secs 25.4
+ed_subgaussian_z1  failed  0  mean cuts 0.62  share with any cut 0.48  median secs 32.9
+2026-10-15 14:07:23 start gom phi=3
+== gom, phi = 3, J = 60
+pl_poisson         failed  0  mean cuts 6.23  share with any cut 0.98  median secs 127.6
+pl_negbin          failed  0  mean cuts 0.00  share with any cut 0.00  median secs 77.4
+ed_poisson_z1      failed  0  mean cuts 4.87  share with any cut 1.00  median secs 7.8
+ed_subgaussian_z0  failed  0  mean cuts 2.32  share with any cut 0.85  median secs 18.8
+ed_subgaussian_z1  failed  0  mean cuts 0.68  share with any cut 0.50  median secs 22.7
+2026-10-15 15:14:02 start log phi=10
+== log, phi = 10, J = 60
+pl_poisson         failed  0  mean cuts 1.22  share with any cut 0.58  median secs 82.0
+pl_negbin          failed  0  mean cuts 0.00  share with any cut 0.00  median secs 90.3
+ed_poisson_z1      failed  0  mean cuts 2.10  share with any cut 0.95  median secs 14.1
+ed_subgaussian_z0  failed  0  mean cuts 2.07  share with any cut 0.92  median secs 23.2
+ed_subgaussian_z1  failed  0  mean cuts 0.35  share with any cut 0.33  median secs 32.3
+2026-10-15 16:15:39 start gom phi=10
+== gom, phi = 10, J = 60
+pl_poisson         failed  0  mean cuts 1.72  share with any cut 0.77  median secs 69.9
+pl_negbin          failed  0  mean cuts 0.00  share with any cut 0.00  median secs 73.6
+ed_poisson_z1      failed  0  mean cuts 2.57  share with any cut 1.00  median secs 10.0
+ed_subgaussian_z0  failed  0  mean cuts 2.22  share with any cut 0.93  median secs 18.9
+ed_subgaussian_z1  failed  0  mean cuts 0.68  share with any cut 0.57  median secs 22.9
+NBDONE
