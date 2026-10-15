@@ -1,5 +1,5 @@
 #!/bin/bash
-# Retoma o estudo de simulação do Artigo 1, pulando combinações já concluídas.
+# Runs the profile of alpha and the SIRD-GA simulation grid, skipping finished combinations.
 cd "$(dirname "$0")"
 echo "$(date +%T) start profile_alpha_sim"
 Rscript profile_alpha_sim.R > results/profile_alpha_sim.log 2>&1

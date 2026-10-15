@@ -1,6 +1,6 @@
 #!/bin/bash
-# Espera a grade do Artigo 1 (resume_all.sh) terminar e roda o Monte Carlo do Artigo 2 (J=60),
-# pulando cenários já concluídos com J=60.
+# Waits for the SIRD-GA simulation grid (resume_all.sh) to finish, then runs the Monte Carlo study
+# of the segmentation rules (J = 60), skipping scenarios already finished with J = 60.
 cd "$(dirname "$0")"
 while pgrep -f "resume_all.sh|sim_study.R" > /dev/null; do sleep 120; done
 echo "$(date '+%F %T') Article 1 grid finished; starting Article 2 MC"
