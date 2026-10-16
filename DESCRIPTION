@@ -5,7 +5,7 @@ Authors@R: c(
     person("Raydonal", "Ospina", , "raydonal@castlab.org", role = c("aut", "cre")),
     person("Jaciele", "Oliveira", , "jaciele.jesus@ufpe.br", role = "aut"),
     person("Cristiano", "Ferraz", , "cferraz@castlab.org", role = "aut"),
-    person("André", "Leite", role = "aut")
+    person("André", "Leite", , "leite@castlab.org", role = "aut")
     )
 Description: Likelihood-based tools for epidemic curves. Stochastic
     compartmental models are fitted to surveillance counts through the
