@@ -2,8 +2,9 @@
 
 Likelihood inference for epidemic curves. The package accompanies two
 manuscripts in preparation derived from Jaciele Oliveira’s doctoral
-thesis (Programa de Pós-Graduação em Estatística, UFPE) and reproduces
-their analyses.
+thesis (Programa de Pós-Graduação em Estatística, UFPE). The scripts and
+results behind the numbers, tables and figures of the manuscripts are in
+[`analysis/`](https://github.com/Raydonal/epicurves/tree/master/analysis).
 
 - **Stochastic compartmental models under the Gaussian approximation.**
   Any mass-action model is declared by its events
