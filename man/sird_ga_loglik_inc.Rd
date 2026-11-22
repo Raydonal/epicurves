@@ -13,7 +13,9 @@ sird_ga_loglik_inc(
   Delta = 1,
   nsub = 10L,
   full = FALSE,
-  lambda_t = NULL
+  lambda_t = NULL,
+  w_cases = NULL,
+  w_deaths = NULL
 )
 }
 \arguments{
@@ -38,6 +40,10 @@ means and standard deviations, ODE path) instead of the scalar.}
 \item{lambda_t}{Optional vector of transmission rates, one per
 observation interval; when given it overrides \code{theta[["lambda"]]}
 (piecewise-constant transmission).}
+
+\item{w_cases, w_deaths}{Optional vectors of positive weights, one per
+observation interval, that multiply the mean and the variance of the
+reported cases and deaths (for example day-of-week reporting effects).}
 }
 \description{
 Kalman-filter approximate log-likelihood of the SIRD-GA state-space model

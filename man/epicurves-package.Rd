@@ -13,6 +13,7 @@ Likelihood-based tools for epidemic curves. Stochastic compartmental models are 
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://raydonal.github.io/epicurves/}
   \item \url{https://github.com/Raydonal/epicurves}
   \item Report bugs at \url{https://github.com/Raydonal/epicurves/issues}
 }
@@ -26,7 +27,7 @@ Authors:
   \item Raydonal Ospina \email{raydonal@castlab.org}
   \item Jaciele Oliveira \email{jaciele.jesus@ufpe.br}
   \item Cristiano Ferraz \email{cferraz@castlab.org}
-  \item André Leite
+  \item André Leite \email{leite@castlab.org}
 }
 
 }

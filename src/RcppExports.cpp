@@ -95,8 +95,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // sird_ga_loglik_inc_cpp
-List sird_ga_loglik_inc_cpp(NumericVector cases, NumericVector deaths, double N, double Delta, NumericVector x0, double lambda, double gamma, double alpha, double p, double tau2, double q, double tau2_d, int use, int nsub, double Q0, double var_floor, NumericVector lambda_t);
-RcppExport SEXP _epicurves_sird_ga_loglik_inc_cpp(SEXP casesSEXP, SEXP deathsSEXP, SEXP NSEXP, SEXP DeltaSEXP, SEXP x0SEXP, SEXP lambdaSEXP, SEXP gammaSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP tau2SEXP, SEXP qSEXP, SEXP tau2_dSEXP, SEXP useSEXP, SEXP nsubSEXP, SEXP Q0SEXP, SEXP var_floorSEXP, SEXP lambda_tSEXP) {
+List sird_ga_loglik_inc_cpp(NumericVector cases, NumericVector deaths, double N, double Delta, NumericVector x0, double lambda, double gamma, double alpha, double p, double tau2, double q, double tau2_d, int use, int nsub, double Q0, double var_floor, NumericVector lambda_t, NumericVector w_cases, NumericVector w_deaths);
+RcppExport SEXP _epicurves_sird_ga_loglik_inc_cpp(SEXP casesSEXP, SEXP deathsSEXP, SEXP NSEXP, SEXP DeltaSEXP, SEXP x0SEXP, SEXP lambdaSEXP, SEXP gammaSEXP, SEXP alphaSEXP, SEXP pSEXP, SEXP tau2SEXP, SEXP qSEXP, SEXP tau2_dSEXP, SEXP useSEXP, SEXP nsubSEXP, SEXP Q0SEXP, SEXP var_floorSEXP, SEXP lambda_tSEXP, SEXP w_casesSEXP, SEXP w_deathsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -117,7 +117,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type Q0(Q0SEXP);
     Rcpp::traits::input_parameter< double >::type var_floor(var_floorSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type lambda_t(lambda_tSEXP);
-    rcpp_result_gen = Rcpp::wrap(sird_ga_loglik_inc_cpp(cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use, nsub, Q0, var_floor, lambda_t));
+    Rcpp::traits::input_parameter< NumericVector >::type w_cases(w_casesSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w_deaths(w_deathsSEXP);
+    rcpp_result_gen = Rcpp::wrap(sird_ga_loglik_inc_cpp(cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use, nsub, Q0, var_floor, lambda_t, w_cases, w_deaths));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -127,7 +129,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_epicurves_ga_loglik_cpp", (DL_FUNC) &_epicurves_ga_loglik_cpp, 16},
     {"_epicurves_sird_ga_transition_cpp", (DL_FUNC) &_epicurves_sird_ga_transition_cpp, 7},
     {"_epicurves_sird_ga_loglik_prev_cpp", (DL_FUNC) &_epicurves_sird_ga_loglik_prev_cpp, 11},
-    {"_epicurves_sird_ga_loglik_inc_cpp", (DL_FUNC) &_epicurves_sird_ga_loglik_inc_cpp, 17},
+    {"_epicurves_sird_ga_loglik_inc_cpp", (DL_FUNC) &_epicurves_sird_ga_loglik_inc_cpp, 19},
     {NULL, NULL, 0}
 };
 

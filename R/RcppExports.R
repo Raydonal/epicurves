@@ -22,7 +22,7 @@ sird_ga_loglik_prev_cpp <- function(y, N, Delta, x0, lambda, gamma, alpha, p, ta
 }
 
 #' @noRd
-sird_ga_loglik_inc_cpp <- function(cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use = 3L, nsub = 10L, Q0 = 1e-10, var_floor = 1e-3, lambda_t = numeric()) {
-    .Call(`_epicurves_sird_ga_loglik_inc_cpp`, cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use, nsub, Q0, var_floor, lambda_t)
+sird_ga_loglik_inc_cpp <- function(cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use = 3L, nsub = 10L, Q0 = 1e-10, var_floor = 1e-3, lambda_t = numeric(), w_cases = numeric(), w_deaths = numeric()) {
+    .Call(`_epicurves_sird_ga_loglik_inc_cpp`, cases, deaths, N, Delta, x0, lambda, gamma, alpha, p, tau2, q, tau2_d, use, nsub, Q0, var_floor, lambda_t, w_cases, w_deaths)
 }
 

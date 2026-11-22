@@ -16,7 +16,8 @@ sird_ga_fit_tv(
   p_max = 0.999,
   Delta = 1,
   nsub = 10L,
-  maxit = 3000
+  maxit = 3000,
+  dow = NULL
 )
 }
 \arguments{
@@ -36,11 +37,19 @@ the block of each interval (\verb{1, ..., B}).}
 \item{p_max}{Upper bound for \code{p}.}
 
 \item{maxit}{Iteration limit.}
+
+\item{dow}{Optional integer vector, one entry per observation interval,
+giving its day of the week (\verb{1, ..., 7}). When given, each observed
+series gets seven reporting weights with mean one (six free
+parameters, day 1 as reference on the log scale) that multiply the
+mean and variance of the counts on that day; see
+\code{\link[=sird_ga_loglik_inc]{sird_ga_loglik_inc()}}. \code{start$dow_cases} and \code{start$dow_deaths}
+(length 7) are optional starting weights.}
 }
 \value{
 A list with \code{lambda} (per block), \code{theta}, \code{loglik}, \code{par},
-\code{hessian}, \code{R_t} (per interval, \eqn{\lambda(t)s(t)/(\gamma+\alpha)}) and
-the full Kalman output \code{kf}.
+\code{hessian}, \code{R_t} (per interval, \eqn{\lambda(t)s(t)/(\gamma+\alpha)}),
+the full Kalman output \code{kf} and, when \code{dow} is given, \code{dow_weights}.
 }
 \description{
 Maximum likelihood for the SIRD-GA model in which the transmission rate is

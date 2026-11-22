@@ -64,3 +64,20 @@ test_that("Simpson Q_k agrees with the joint RK4 integration in every interval",
     expect_lt(norm(sird_ga_Qk(tr, k, 1) - ref[, , k], "F") / norm(ref[, , k], "F"), 1e-4)
   }
 })
+
+test_that("day-of-week weights: unit weights change nothing and weights scale the first prediction", {
+  th <- list(lambda = 0.5, gamma = 0.2, alpha = 0.05, s0 = 1 - 1e-3, i0 = 1e-3, r0 = 0,
+             p = 0.3, tau2 = 2, q = 1, tau2_d = 1)
+  set.seed(5)
+  cases <- rpois(60, 50); deaths <- rpois(60, 3)
+  a <- sird_ga_loglik_inc(th, cases, deaths, 1e5, "both", 1, 5L, full = TRUE)
+  b <- sird_ga_loglik_inc(th, cases, deaths, 1e5, "both", 1, 5L, full = TRUE,
+                          w_cases = rep(1, 60), w_deaths = rep(1, 60))
+  expect_equal(a$loglik, b$loglik)
+  w <- rep(c(0.5, 1.2, 1.1, 1, 1, 1.1, 1.1), length.out = 60)
+  d <- sird_ga_loglik_inc(th, cases, deaths, 1e5, "both", 1, 5L, full = TRUE,
+                          w_cases = w, w_deaths = w)
+  expect_equal(d$fitted_cases[1], w[1] * a$fitted_cases[1])
+  expect_equal(d$fitted_deaths[1], w[1] * a$fitted_deaths[1])
+  expect_false(isTRUE(all.equal(a$loglik, d$loglik)))
+})

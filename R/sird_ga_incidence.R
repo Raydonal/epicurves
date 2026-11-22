@@ -54,10 +54,14 @@ sird_ga_simulate_inc <- function(N, S0, I0, R0, lambda, gamma, alpha,
 #' @param lambda_t Optional vector of transmission rates, one per
 #'   observation interval; when given it overrides `theta[["lambda"]]`
 #'   (piecewise-constant transmission).
+#' @param w_cases,w_deaths Optional vectors of positive weights, one per
+#'   observation interval, that multiply the mean and the variance of the
+#'   reported cases and deaths (for example day-of-week reporting effects).
 #' @export
 sird_ga_loglik_inc <- function(theta, cases = NULL, deaths = NULL, N,
                                use = c("both", "cases", "deaths"),
-                               Delta = 1, nsub = 10L, full = FALSE, lambda_t = NULL) {
+                               Delta = 1, nsub = 10L, full = FALSE, lambda_t = NULL,
+                               w_cases = NULL, w_deaths = NULL) {
   use <- match.arg(use)
   code <- switch(use, cases = 1L, deaths = 2L, both = 3L)
   th <- as.list(theta)
@@ -72,7 +76,9 @@ sird_ga_loglik_inc <- function(theta, cases = NULL, deaths = NULL, N,
                                 c(th$s0, th$i0, th$r0), th$lambda, th$gamma, th$alpha,
                                 th$p, th$tau2, th$q, th$tau2_d, use = code,
                                 nsub = as.integer(nsub),
-                                lambda_t = if (is.null(lambda_t)) numeric(0) else as.numeric(lambda_t))
+                                lambda_t = if (is.null(lambda_t)) numeric(0) else as.numeric(lambda_t),
+                                w_cases = if (is.null(w_cases)) numeric(0) else as.numeric(w_cases),
+                                w_deaths = if (is.null(w_deaths)) numeric(0) else as.numeric(w_deaths))
   if (full) out else out$loglik
 }
 
@@ -227,13 +233,21 @@ sird_ga_profile <- function(fit, cases = NULL, deaths = NULL, param, grid,
 #' @param q Death reporting probability (fixed).
 #' @param p_max Upper bound for `p`.
 #' @param maxit Iteration limit.
+#' @param dow Optional integer vector, one entry per observation interval,
+#'   giving its day of the week (`1, ..., 7`). When given, each observed
+#'   series gets seven reporting weights with mean one (six free
+#'   parameters, day 1 as reference on the log scale) that multiply the
+#'   mean and variance of the counts on that day; see
+#'   [sird_ga_loglik_inc()]. `start$dow_cases` and `start$dow_deaths`
+#'   (length 7) are optional starting weights.
 #' @return A list with `lambda` (per block), `theta`, `loglik`, `par`,
-#'   `hessian`, `R_t` (per interval, \eqn{\lambda(t)s(t)/(\gamma+\alpha)}) and
-#'   the full Kalman output `kf`.
+#'   `hessian`, `R_t` (per interval, \eqn{\lambda(t)s(t)/(\gamma+\alpha)}),
+#'   the full Kalman output `kf` and, when `dow` is given, `dow_weights`.
 #' @export
 sird_ga_fit_tv <- function(cases = NULL, deaths = NULL, N, blocks,
                            use = c("both", "cases", "deaths"), start, fixed = list(),
-                           q = 1, p_max = 0.999, Delta = 1, nsub = 10L, maxit = 3000) {
+                           q = 1, p_max = 0.999, Delta = 1, nsub = 10L, maxit = 3000,
+                           dow = NULL) {
   use <- match.arg(use)
   B <- max(blocks)
   sc_names <- setdiff(c("gamma", "alpha", "i0", "p", "tau2", "tau2_d"), names(fixed))
@@ -243,21 +257,35 @@ sird_ga_fit_tv <- function(cases = NULL, deaths = NULL, N, blocks,
               p = function(x) stats::qlogis(x / p_max))
   bwd <- list(gamma = exp, alpha = exp, tau2 = exp, tau2_d = exp, i0 = stats::plogis,
               p = function(v) p_max * stats::plogis(v))
+  dow_series <- if (is.null(dow)) character(0) else
+    switch(use, both = c("cases", "deaths"), cases = "cases", deaths = "deaths")
+  n_sc <- length(sc_names)
+  dow_w <- function(eta) { e <- exp(c(0, eta)); 7 * e / sum(e) }
   unpack <- function(v) {
     lam <- exp(v[seq_len(B)])
     th <- list(q = q, r0 = 0, p = 1, tau2 = 1, tau2_d = 1, lambda = lam[1])
     for (nm in names(fixed)) th[[nm]] <- fixed[[nm]]
     for (j in seq_along(sc_names)) th[[sc_names[j]]] <- bwd[[sc_names[j]]](unname(v[B + j]))
     th$s0 <- 1 - th$i0 - th$r0
-    list(th = th, lam = lam)
+    w <- list()
+    for (j in seq_along(dow_series))
+      w[[dow_series[j]]] <- dow_w(unname(v[B + n_sc + 6 * (j - 1) + 1:6]))
+    list(th = th, lam = lam, w = w)
   }
+  wt <- function(u, s) if (is.null(u$w[[s]])) NULL else u$w[[s]][dow]
   nll <- function(v) {
     u <- unpack(v)
     ll <- sird_ga_loglik_inc(u$th, cases, deaths, N, use, Delta, nsub,
-                             lambda_t = u$lam[blocks])
+                             lambda_t = u$lam[blocks],
+                             w_cases = wt(u, "cases"), w_deaths = wt(u, "deaths"))
     if (!is.finite(ll)) 1e10 else -ll
   }
-  v0 <- c(log(start$lambda), vapply(sc_names, function(nm) fwd[[nm]](start[[nm]]), 1))
+  eta0 <- function(s) {
+    w0 <- start[[paste0("dow_", s)]]
+    if (is.null(w0)) rep(0, 6) else log(w0[-1] / w0[1])
+  }
+  v0 <- c(log(start$lambda), vapply(sc_names, function(nm) fwd[[nm]](start[[nm]]), 1),
+          unlist(lapply(dow_series, eta0)))
   f <- stats::optim(v0, nll, method = "BFGS", control = list(maxit = maxit, reltol = 1e-12))
   f2 <- stats::optim(f$par, nll, method = "Nelder-Mead", control = list(maxit = maxit, reltol = 1e-12))
   if (f2$value < f$value) f <- f2
@@ -266,10 +294,12 @@ sird_ga_fit_tv <- function(cases = NULL, deaths = NULL, N, blocks,
   u <- unpack(f$par)
   H <- tryCatch(stats::optimHess(f$par, nll), error = function(e) NULL)
   kf <- sird_ga_loglik_inc(u$th, cases, deaths, N, use, Delta, nsub, full = TRUE,
-                           lambda_t = u$lam[blocks])
+                           lambda_t = u$lam[blocks],
+                           w_cases = wt(u, "cases"), w_deaths = wt(u, "deaths"))
   s_t <- kf$x[-1, 1]
   R_t <- u$lam[blocks] * s_t / (u$th$gamma + u$th$alpha)
   list(lambda = u$lam, theta = unlist(u$th[c("gamma", "alpha", "i0", "p", "tau2", "tau2_d", "q")]),
        loglik = -f$value, par = f$par, hessian = H, R_t = R_t, kf = kf, blocks = blocks,
-       sc_names = sc_names, fixed = fixed, convergence = f$convergence)
+       sc_names = sc_names, fixed = fixed, convergence = f$convergence,
+       dow_weights = if (length(u$w)) u$w else NULL)
 }

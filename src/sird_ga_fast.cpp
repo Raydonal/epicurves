@@ -166,6 +166,8 @@ List sird_ga_loglik_prev_cpp(NumericVector y, double N, double Delta,
 // reported deaths D_k ~ Bin(new deaths, q)     + N(0, tau2_d * new deaths),
 // both Gaussian-approximated with variances evaluated on the ODE increments.
 // `use` selects the streams: 1 = cases only, 2 = deaths only, 3 = both.
+// Optional per-interval weights w_cases, w_deaths (e.g. day-of-week effects)
+// multiply the mean and the variance of the corresponding observation.
 //' @noRd
 // [[Rcpp::export]]
 List sird_ga_loglik_inc_cpp(NumericVector cases, NumericVector deaths,
@@ -174,7 +176,9 @@ List sird_ga_loglik_inc_cpp(NumericVector cases, NumericVector deaths,
                             double p, double tau2, double q, double tau2_d,
                             int use = 3, int nsub = 10, double Q0 = 1e-10,
                             double var_floor = 1e-3,
-                            NumericVector lambda_t = NumericVector()) {
+                            NumericVector lambda_t = NumericVector(),
+                            NumericVector w_cases = NumericVector(),
+                            NumericVector w_deaths = NumericVector()) {
   int n = std::max(cases.size(), deaths.size());
   Rates r{lambda, gamma, alpha};
   arma::vec x0v(x0.begin(), 3);
@@ -210,25 +214,26 @@ List sird_ga_loglik_inc_cpp(NumericVector cases, NumericVector deaths,
     double d_now = 1 - arma::accu(tr.x.row(k));
     double inc_d = d_now - d_prev;
     double floor_frac = var_floor / N;
+    double wc = w_cases.size() == n ? w_cases[k - 1] : 1.0;
+    double wd = w_deaths.size() == n ? w_deaths[k - 1] : 1.0;
+    arma::rowvec hck = wc * hc, hdk = wd * hd;
+    double rc = wc * (p * (1 - p) + tau2) * std::max(inc_c, floor_frac) / N;
+    double rd = wd * (q * (1 - q) + tau2_d) * std::max(inc_d, floor_frac) / N;
 
     std::vector<int> idx;
     std::vector<double> yv, rv;
     std::vector<arma::rowvec> hv;
     bool have_c = (use & 1) && k - 1 < cases.size() && !NumericVector::is_na(cases[k - 1]);
     bool have_d = (use & 2) && k - 1 < deaths.size() && !NumericVector::is_na(deaths[k - 1]);
-    fit_c[k - 1] = N * arma::as_scalar(hc * Z);
-    fit_d[k - 1] = N * arma::as_scalar(hd * Z);
-    sd_c[k - 1] = N * std::sqrt(std::max(arma::as_scalar(hc * S * hc.t()) +
-                                (p * (1 - p) + tau2) * std::max(inc_c, floor_frac) / N, 0.0));
-    sd_d[k - 1] = N * std::sqrt(std::max(arma::as_scalar(hd * S * hd.t()) +
-                                (q * (1 - q) + tau2_d) * std::max(inc_d, floor_frac) / N, 0.0));
+    fit_c[k - 1] = N * arma::as_scalar(hck * Z);
+    fit_d[k - 1] = N * arma::as_scalar(hdk * Z);
+    sd_c[k - 1] = N * std::sqrt(std::max(arma::as_scalar(hck * S * hck.t()) + rc, 0.0));
+    sd_d[k - 1] = N * std::sqrt(std::max(arma::as_scalar(hdk * S * hdk.t()) + rd, 0.0));
     if (have_c) {
-      hv.push_back(hc); yv.push_back(cases[k - 1] / N);
-      rv.push_back((p * (1 - p) + tau2) * std::max(inc_c, floor_frac) / N);
+      hv.push_back(hck); yv.push_back(cases[k - 1] / N); rv.push_back(rc);
     }
     if (have_d) {
-      hv.push_back(hd); yv.push_back(deaths[k - 1] / N);
-      rv.push_back((q * (1 - q) + tau2_d) * std::max(inc_d, floor_frac) / N);
+      hv.push_back(hdk); yv.push_back(deaths[k - 1] / N); rv.push_back(rd);
     }
     int m = hv.size();
     if (m == 0) continue;
