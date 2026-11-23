@@ -1,0 +1,18 @@
+2026-11-21 10:43:07 start referee studies
+2026-11-21 11:02:47 BLOCKSDONE
+2026-11-21 11:26:44 FLOORDONE
+2026-11-21 11:27:14 runner stopped by hand after FLOORDONE to insert paraiba_blocks_warm.R; restarting (finished stages are skipped)
+2026-11-21 11:27:14 start referee studies
+2026-11-21 11:27:17 BLOCKSDONE
+2026-11-21 11:27:20 FLOORDONE
+2026-11-21 12:00:36 BLOCKSWARMDONE
+2026-11-21 13:28:19 note: paraiba_profile_p_refined.R failed in its summary (list NULL-dropping bug) after both phases were saved; fixed and summary rerun by hand -> PROFILEDONE in results/paraiba_profile_p_refined.log
+2026-11-21 21:28:50 REGIMEDONE A
+2026-11-21 23:30:34 REGIMEDONE B
+2026-11-22 00:37:00 REGIMEDONE C
+2026-11-22 00:37:00 REGIMESUMMARYDONE
+2026-11-22 01:14:16 GENERICDONE 1 20000
+2026-11-22 01:50:00 GENERICDONE 1 100000
+2026-11-22 03:33:07 GENERICDONE 4 20000
+2026-11-22 05:17:32 GENERICDONE 4 100000
+2026-11-22 05:17:33 ALLREFEREEDONE

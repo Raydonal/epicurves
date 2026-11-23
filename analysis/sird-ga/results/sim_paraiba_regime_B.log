@@ -1,0 +1,19 @@
+2026-11-21 21:28:52 scenario B reps 1 - 100 cores 3 
+2026-11-21 21:35:44 scenario B chunk 1 done; secs per rep: 212 199 222 183 202 191 
+2026-11-21 21:42:54 scenario B chunk 7 done; secs per rep: 232 215 198 154 187 232 
+2026-11-21 21:49:30 scenario B chunk 13 done; secs per rep: 209 189 167 187 193 189 
+2026-11-21 21:57:52 scenario B chunk 19 done; secs per rep: 305 163 216 196 205 211 
+2026-11-21 22:06:12 scenario B chunk 25 done; secs per rep: 235 229 311 214 215 189 
+2026-11-21 22:13:50 scenario B chunk 31 done; secs per rep: 240 219 231 212 198 227 
+2026-11-21 22:21:11 scenario B chunk 37 done; secs per rep: 205 191 215 236 223 159 
+2026-11-21 22:27:46 scenario B chunk 43 done; secs per rep: 192 187 196 198 192 199 
+2026-11-21 22:34:58 scenario B chunk 49 done; secs per rep: 216 180 187 216 200 196 
+2026-11-21 22:41:39 scenario B chunk 55 done; secs per rep: 231 193 156 170 189 174 
+2026-11-21 22:49:21 scenario B chunk 61 done; secs per rep: 245 267 173 207 195 195 
+2026-11-21 22:56:33 scenario B chunk 67 done; secs per rep: 244 211 218 188 170 171 
+2026-11-21 23:02:59 scenario B chunk 73 done; secs per rep: 199 194 152 187 192 193 
+2026-11-21 23:09:46 scenario B chunk 79 done; secs per rep: 184 171 208 222 223 172 
+2026-11-21 23:16:43 scenario B chunk 85 done; secs per rep: 201 189 206 186 200 211 
+2026-11-21 23:24:17 scenario B chunk 91 done; secs per rep: 210 201 174 244 222 185 
+2026-11-21 23:30:34 scenario B chunk 97 done; secs per rep: 189 205 197 188 
+REGIMEDONE B 

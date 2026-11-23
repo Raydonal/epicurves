@@ -1,0 +1,50 @@
+Daily Paraíba fits, weeks 13-52 of 2020 (280 days), 10 blocks of 28 days
+
+ model  start   loglik conv          p minutes
+    M0   gen5 5831.818    0 0.23854841     6.8
+    M0   gen7 5831.149    0 0.21039673     5.6
+    M0 weekly 5828.278    0 0.08468062     5.7
+    M0  gen10 4906.323    0 0.99900000     1.9
+    M1 weekly 5987.978    1 0.10077276     7.3
+    M1   gen7 5987.946    0 0.10896676     8.1
+    M1 fromM0 5987.910    0 0.25753115     6.0
+    M1  gen10 5987.771    0 0.26581643    17.0
+    M1   gen5 5968.233    0 0.80637529     8.3
+
+M0: loglik 5831.82, k = 16, AIC -11631.6, BIC -11562.4
+M1: loglik 5987.98, k = 28, AIC -11920.0, BIC -11798.8
+Likelihood ratio M1 vs M0: 312.3 on 12 df
+
+Day-of-week weights (M1; Monday ... Sunday) and empirical ratios from week 16
+               1     2     3     4     5     6     7
+cases_fit  0.407 1.294 1.392 1.271 1.223 1.046 0.367
+cases_emp  0.404 1.276 1.387 1.267 1.226 1.065 0.376
+deaths_fit 0.886 1.138 1.087 1.114 1.008 0.927 0.840
+deaths_emp 0.897 1.123 1.101 1.094 1.021 0.936 0.828
+                 weekly daily_M0 daily_M1
+inf_period_days  6.4561   0.7073   3.1632
+ifr_pct          0.1462   0.5394   0.2276
+p                0.0656   0.2385   0.1008
+i0N             54.0628   2.7114  36.0392
+attack_pct      58.6473  15.1982  38.9653
+tau2             3.9675  45.4127   5.5250
+tau2_d           2.3938   0.8712   0.5368
+R_block1         2.4713   1.1084   1.5132
+R_block2         1.2079   1.0375   1.1907
+R_block3         1.0570   1.0334   1.0833
+R_block4         0.9002   1.0064   0.9755
+R_block5         0.9052   0.9803   0.9587
+R_block6         0.8604   0.9802   0.9348
+R_block7         0.9282   0.9893   0.9686
+R_block8         0.9592   0.9945   0.9829
+R_block9         1.1092   1.0085   1.0590
+R_block10        1.1878   1.0257   1.0743
+
+Wald SE of p: weekly 0.0106, M0 NA, M1 NA; min Hessian eigenvalue: 1.25, -3.57, -0.154
+
+Innovations: autocorrelation at lags 1 and 7, Ljung-Box p-values at lags 7 and 14
+  M0 cases  acf1 0.39 acf7 0.69  LB7 0.000 LB14 0.000  sd 1.00
+  M0 deaths acf1 0.11 acf7 0.08  LB7 0.010 LB14 0.047  sd 1.01
+  M1 cases  acf1 0.19 acf7 0.07  LB7 0.014 LB14 0.040  sd 1.01
+  M1 deaths acf1 0.14 acf7 0.01  LB7 0.000 LB14 0.000  sd 0.99
+DAILYDONE

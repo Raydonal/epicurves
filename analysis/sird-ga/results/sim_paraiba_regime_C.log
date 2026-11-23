@@ -1,0 +1,11 @@
+2026-11-21 23:30:35 scenario C reps 1 - 50 cores 3 
+2026-11-21 23:37:43 scenario C chunk 1 done; secs per rep: 206 236 208 222 192 209 
+2026-11-21 23:45:30 scenario C chunk 7 done; secs per rep: 229 180 203 238 219 173 
+2026-11-21 23:53:28 scenario C chunk 13 done; secs per rep: 212 218 227 251 259 213 
+2026-11-22 00:01:15 scenario C chunk 19 done; secs per rep: 169 233 239 219 234 208 
+2026-11-22 00:09:00 scenario C chunk 25 done; secs per rep: 217 252 252 232 213 166 
+2026-11-22 00:16:47 scenario C chunk 31 done; secs per rep: 247 197 199 220 200 194 
+2026-11-22 00:25:24 scenario C chunk 37 done; secs per rep: 211 277 230 183 240 186 
+2026-11-22 00:32:58 scenario C chunk 43 done; secs per rep: 163 267 210 219 178 244 
+2026-11-22 00:37:00 scenario C chunk 49 done; secs per rep: 241 236 
+REGIMEDONE C 

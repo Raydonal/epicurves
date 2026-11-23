@@ -49,6 +49,16 @@ example `setsid nohup ./resume_all.sh >> results/run_all.log 2>&1 &`.
 | Paraíba, sensitivity to the death reporting probability | `paraiba_tv_q.R` |
 | Paraíba, parametric bootstrap | `paraiba_bootstrap.R`, `paraiba_bootstrap_summary.R` |
 | Accuracy of the numerical integration | `check_Qk.R` |
+| Paraíba, length of the blocks of constant transmission (figure) | `paraiba_blocks.R`, `paraiba_blocks_warm.R`, `fig_paraiba_blocks.R` |
+| Paraíba, refined profile in the case reporting probability (figure) | `paraiba_profile_p_refined.R`, `fig_paraiba_profile_p.R` |
+| Paraíba, lower bound of the observation variance | `paraiba_floor.R` |
+| Paraíba, standardised innovations (figure) | `fig_paraiba_innov.R` |
+| Paraíba, daily counts with day-of-week weights and their profile in the reporting probability | `paraiba_daily_dow.R`, `paraiba_daily_profile_p.R` |
+| Simulation in the design of the Paraíba application (table) | `sim_paraiba_regime.R` (helpers in `regime_helpers.R`), `summarise_paraiba_regime.R`, `regime_truth_check.R` |
+| Simulation study repeated from generic starting values | `sim_generic_starts.R`, `summarise_generic_starts.R` |
+| Simulation figures | `fig_sim_estimates.R`, `fig_sim_se_ratio.R` |
+
+`run_referee_studies.sh` runs the block-length, variance-bound, profile and simulation studies above and skips finished stages.
 
 ### `piecewise-ensemble/`
 

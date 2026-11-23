@@ -1,0 +1,36 @@
+2026-11-21 13:27:22 scenario A reps 1 - 200 cores 3 
+2026-11-21 13:47:35 scenario A chunk 1 done; secs per rep: 589 610 597 624 546 553 
+2026-11-21 14:07:36 scenario A chunk 7 done; secs per rep: 502 531 556 618 605 645 
+2026-11-21 14:26:06 scenario A chunk 13 done; secs per rep: 592 592 597 420 517 491 
+2026-11-21 14:47:07 scenario A chunk 19 done; secs per rep: 655 607 566 591 654 593 
+2026-11-21 15:08:59 scenario A chunk 25 done; secs per rep: 670 554 596 641 612 497 
+2026-11-21 15:29:31 scenario A chunk 31 done; secs per rep: 583 464 647 614 663 585 
+2026-11-21 15:50:27 scenario A chunk 37 done; secs per rep: 518 560 703 686 521 552 
+2026-11-21 16:10:40 scenario A chunk 43 done; secs per rep: 633 571 580 568 641 625 
+2026-11-21 16:31:49 scenario A chunk 49 done; secs per rep: 552 560 696 606 670 573 
+2026-11-21 16:50:44 scenario A chunk 55 done; secs per rep: 526 710 545 389 425 443 
+2026-11-21 17:03:29 scenario A chunk 61 done; secs per rep: 434 399 401 331 313 356 
+2026-11-21 17:17:40 scenario A chunk 67 done; secs per rep: 388 395 397 426 392 454 
+2026-11-21 17:32:43 scenario A chunk 73 done; secs per rep: 323 357 453 534 485 449 
+2026-11-21 17:47:24 scenario A chunk 79 done; secs per rep: 451 410 394 430 440 433 
+2026-11-21 18:02:26 scenario A chunk 85 done; secs per rep: 387 436 485 370 390 416 
+2026-11-21 18:15:59 scenario A chunk 91 done; secs per rep: 365 458 405 394 353 408 
+2026-11-21 18:29:38 scenario A chunk 97 done; secs per rep: 391 388 410 355 393 409 
+2026-11-21 18:43:13 scenario A chunk 103 done; secs per rep: 380 372 448 430 429 366 
+2026-11-21 19:00:20 scenario A chunk 109 done; secs per rep: 660 442 325 366 430 448 
+2026-11-21 19:15:05 scenario A chunk 115 done; secs per rep: 421 363 342 464 457 391 
+2026-11-21 19:29:58 scenario A chunk 121 done; secs per rep: 326 388 370 462 383 523 
+2026-11-21 19:43:59 scenario A chunk 127 done; secs per rep: 483 423 417 347 418 408 
+2026-11-21 19:57:25 scenario A chunk 133 done; secs per rep: 424 408 376 383 354 384 
+2026-11-21 20:10:36 scenario A chunk 139 done; secs per rep: 440 407 400 351 374 273 
+2026-11-21 20:23:56 scenario A chunk 145 done; secs per rep: 416 376 422 304 331 378 
+2026-11-21 20:32:21 scenario A chunk 151 done; secs per rep: 287 244 287 205 214 217 
+2026-11-21 20:40:03 scenario A chunk 157 done; secs per rep: 262 256 206 201 198 219 
+2026-11-21 20:47:34 scenario A chunk 163 done; secs per rep: 210 209 212 241 177 209 
+2026-11-21 20:55:21 scenario A chunk 169 done; secs per rep: 200 259 217 227 208 209 
+2026-11-21 21:02:55 scenario A chunk 175 done; secs per rep: 232 234 189 222 183 217 
+2026-11-21 21:10:07 scenario A chunk 181 done; secs per rep: 221 215 212 209 208 220 
+2026-11-21 21:17:21 scenario A chunk 187 done; secs per rep: 205 198 209 225 235 226 
+2026-11-21 21:24:41 scenario A chunk 193 done; secs per rep: 219 226 207 158 215 195 
+2026-11-21 21:28:50 scenario A chunk 199 done; secs per rep: 199 249 
+REGIMEDONE A 

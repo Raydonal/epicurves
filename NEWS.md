@@ -1,5 +1,17 @@
 # epicurves 0.0.0.9000
 
+## Day-of-week reporting weights for SIRD-GA incidence data
+
+`sird_ga_loglik_inc()` accepts weights `w_cases` and `w_deaths`, one per
+observation, that multiply the mean and the variance of that observation's
+reported counts. `sird_ga_fit_tv(dow = )` estimates seven weights with mean one
+for each series from a day-of-week index and returns them in `dow_weights`.
+Without weights the likelihood is unchanged (the weekly Paraíba fit gives
+754.3979 as before). On the daily Paraíba counts the weights reproduce the
+weekly reporting cycle, but the profile likelihood of the case reporting
+probability is flatter than with weekly data
+(`analysis/sird-ga/paraiba_daily_profile_p.R`).
+
 ## Parametric bootstrap for the general engine
 
 `ga_bootstrap()` simulates data sets from a `ga_fit()` result with

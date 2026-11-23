@@ -1,0 +1,14 @@
+Standardised one-step-ahead innovations, best fit of results/paraiba_tv.rds (loglik 754.4 ), n = 40 weeks
+z = (y - fitted_one_step_mean) / predictive_sd, per series (cases and deaths marginally)
+
+Cases: mean -0.078, sd 1.015, min -2.77, max 2.26
+  Ljung-Box lag 4: Q = 3.653, p = 0.4550
+  Ljung-Box lag 8: Q = 6.092, p = 0.6370
+  Shapiro-Wilk: W = 0.9893, p = 0.9643
+  lag-1 autocorrelation: -0.15 
+
+Deaths: mean 0.086, sd 0.930, min -1.86, max 2.37
+  Ljung-Box lag 4: Q = 5.695, p = 0.2231
+  Ljung-Box lag 8: Q = 7.284, p = 0.5063
+  Shapiro-Wilk: W = 0.9788, p = 0.6444
+  lag-1 autocorrelation: 0.354 

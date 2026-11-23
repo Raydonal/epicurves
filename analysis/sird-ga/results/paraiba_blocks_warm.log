@@ -1,0 +1,20 @@
+Warm-start log-likelihoods (rows: fitted L, columns: source L; generic best in column 'generic')
+  generic  from2  from3  from4  from5  from6  from8
+2  757.00     NA 758.15 758.15 758.11 758.15 758.03
+3  758.79 758.79     NA 758.79 758.79 758.79 758.79
+4  754.40 754.40 754.40     NA 754.40 754.40 754.40
+5  749.89 749.89 749.89 749.89     NA 749.89 749.89
+6  745.49 745.49 745.49 745.49 745.49     NA 745.49
+8  746.67 746.57 746.57 746.53 746.64 746.59     NA
+
+Block-length sensitivity, best of generic and warm starts (n = 80 for BIC)
+ L blocks last_block_weeks  k    best_from loglik loglik_generic   AIC   BIC       p      ifr inf_period_days attack    i0N   tau2 tau2_d R_block1 conv hess_min_eig    dAIC   dBIC
+ 2     20                2 26 warm_from_L4  758.2          757.0 -1464 -1402 0.11056 0.002491           2.865 0.3485  36.60  4.588  2.954    1.561    0      -0.4481 13.2808 42.767
+ 3     14                1 20 warm_from_L4  758.8          758.8 -1478 -1430 0.06790 0.001493           7.628 0.5521  39.10  4.148  1.927    3.206    0       0.8862  0.0000 15.194
+ 4     10                4 16 warm_from_L8  754.4          754.4 -1477 -1439 0.06560 0.001462           6.450 0.5868  54.12  3.962  2.389    2.469    0       1.2554  0.7872  6.453
+ 5      8                5 14 warm_from_L3  749.9          749.9 -1472 -1438 0.09958 0.002249           3.182 0.3955 125.46  7.410  2.186    1.349    0       0.8564  5.7937  6.696
+ 6      7                4 13 warm_from_L3  745.5          745.5 -1465 -1434 0.10671 0.002390           4.970 0.3683 307.25 12.653  1.678    1.425    0       0.5955 12.6036 11.123
+ 8      5                8 11     generic1  746.7          746.7 -1471 -1445 0.12744 0.002852           2.827 0.2915 109.37  8.510  3.933    1.264    0       1.5516  6.2442  0.000
+
+nesting checks (finer >= coarser): 2>=4 TRUE, 4>=8 TRUE, 2>=8 TRUE, 2>=6 TRUE, 3>=6 TRUE 
+BLOCKSWARMDONE
